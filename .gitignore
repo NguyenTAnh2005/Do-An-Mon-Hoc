@@ -1,0 +1,66 @@
+### ============ CHUNG — biến môi trường & secrets ============
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.json
+
+### ============ CHUNG — hệ điều hành & editor ============
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+### ============ WEB — Backend (FastAPI / Python) ============
+WEB/backend/__pycache__/
+WEB/backend/**/__pycache__/
+WEB/backend/venv/
+WEB/backend/.venv/
+WEB/backend/*.egg-info/
+WEB/backend/.pytest_cache/
+
+# Alembic — giữ lại thư mục versions, chỉ ignore cache nếu có
+WEB/backend/**/*.pyc
+
+### ============ WEB — Frontend (React) ============
+WEB/frontend/node_modules/
+WEB/frontend/dist/
+WEB/frontend/build/
+WEB/frontend/.vite/
+WEB/frontend/*.local
+
+### ============ AI_CNN — Python + model + dataset ============
+AI_CNN/__pycache__/
+AI_CNN/**/__pycache__/
+AI_CNN/venv/
+AI_CNN/.venv/
+
+# Model weight — thường nặng, không nên push lên git
+AI_CNN/*.pt
+AI_CNN/*.onnx
+AI_CNN/weights/
+
+# Dataset tải từ Roboflow — nặng, mỗi người tự tải lại theo hướng dẫn trong README
+AI_CNN/data/
+AI_CNN/dataset/
+AI_CNN/datasets/
+
+# Kết quả train (log, ảnh output của YOLO...)
+AI_CNN/runs/
+
+# Ảnh tạm lưu frame trước khi gửi lên backend
+AI_CNN/tmp_frames/
+AI_CNN/*.jpg
+AI_CNN/*.png
+!AI_CNN/**/sample/*.jpg
+
+### ============ IOT — PlatformIO / Arduino ============
+IOT/.pio/
+IOT/.vscode/
+IOT/**/build/
+
+### ============ Test / scratch file ở gốc repo ============
+test.py
+*.log
