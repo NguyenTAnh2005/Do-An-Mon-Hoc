@@ -20,7 +20,7 @@ _Note_: Web chỉ hỗ trợ đăng nhập mới vào xem quản lý, chưa hỗ
 
 - Error Handling, Success Response config
 - jwt, refresh token service
-- Các schemas, crud, service API liên quan đến auth
+- Các schemas, crud, service API liên quan đến a  uth
 
 **FE**
 
