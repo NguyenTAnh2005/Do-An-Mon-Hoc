@@ -1,3 +1,2 @@
-ultralytics
-torch
-torchvision
+torch==2.7.1+cu118
+ultralytics==8.4.146

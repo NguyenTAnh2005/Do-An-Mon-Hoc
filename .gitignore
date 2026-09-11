@@ -51,6 +51,7 @@ AI_CNN/datasets/
 AI_CNN/runs/
 
 # Ảnh tạm lưu frame trước khi gửi lên backend
+AI_CNN/model
 AI_CNN/tmp_frames/
 AI_CNN/*.jpg
 AI_CNN/*.png
