@@ -37,7 +37,12 @@ Vấn đề phân loại rác thải trong khuôn viên trường học hiện n
 
 ## 🏗️ 2. Kiến trúc hệ thống
 
-> 🚧 **Đang cập nhật**
+![alt text](./DOCS/img/cac-thanh-phan.png)
+
+> 🚧 **Chi tiết**:
+
+- [`File mô tả danh sách các thành phần`](./DOCS/01-kien-truc-tong-the/danh-sach-thanh-phan.md)
+- [`File mô tả vai trò các thành phần`](./DOCS/01-kien-truc-tong-the/vai-tro-thanh-phan.md)
 
 ---
 
@@ -106,7 +111,14 @@ Mỗi khu vực demo bao gồm:
 
 ## 🔄 7. Luồng dữ liệu chính
 
-> 🚧 **Đang cập nhật**
+- Logic nhận diện rác
+  ![alt text](./DOCS/img/nhan-dien.png)
+
+- Logic cập nhật mức đầy
+  ![alt text](./DOCS/img/do-mua-day.png)
+
+- Logic cập nhật trạng thái On - Off
+  ![alt text](./DOCS/img/trang-thai-on-off.png)
 
 ---
 

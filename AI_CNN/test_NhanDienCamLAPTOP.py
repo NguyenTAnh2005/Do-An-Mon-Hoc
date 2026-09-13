@@ -1,6 +1,7 @@
 import time
 import cv2
 import torch
+from pathlib import Path
 from ultralytics import YOLO
 from ultralytics.nn.tasks import DetectionModel
 
@@ -8,7 +9,7 @@ from ultralytics.nn.tasks import DetectionModel
 torch.serialization.add_safe_globals([DetectionModel])
 
 # 1. Load mô hình
-MODEL_PATH = r"D:\Do-An-Mon-Hoc\AI_CNN\best.pt"
+MODEL_PATH = Path.cwd()/ "model"/"yolo_v8_training"/"weights" / "v1-best.pt"
 model = YOLO(MODEL_PATH)
 
 # 2. Mở Webcam
