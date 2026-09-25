@@ -21,6 +21,7 @@ type nul > "%BE%\main.py"
 type nul > "%BE%\requirements.txt"
 type nul > "%BE%\.env"
 type nul > "%BE%\README.md"
+type nul > "%BE%\app\core\exception.py"
 
 if not exist "%BE%\.gitignore" (
     echo __pycache__/> "%BE%\.gitignore"
