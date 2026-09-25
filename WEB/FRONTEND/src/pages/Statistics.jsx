@@ -1,16 +1,16 @@
-// src/pages/Dashboard.jsx
+// src/pages/Statistics.jsx
 import clsx from "clsx";
 import { sectionTitle, mutedText } from "../utils/style";
 
-const Dashboard = () => {
+const Statistics = () => {
     return (
         <div className="flex flex-col items-start gap-2">
-            <h1 className={sectionTitle}>Dashboard</h1>
+            <h1 className={sectionTitle}>Thống kê</h1>
             <p className={clsx(mutedText, "text-base")}>
-                Realtime 6 thùng: % đầy mỗi thùng, trạng thái online/offline IoT và AI tách riêng
+                Thống kê theo loại rác / khu vực / thời gian, và độ chính xác model theo ngày
             </p>
         </div>
     );
 };
 
-export default Dashboard;
+export default Statistics;
