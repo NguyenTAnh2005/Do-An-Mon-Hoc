@@ -13,23 +13,23 @@ Thumbs.db
 .idea/
 *.swp
 
-### ============ WEB — Backend (FastAPI / Python) ============
-WEB/backend/__pycache__/
-WEB/backend/**/__pycache__/
-WEB/backend/venv/
-WEB/backend/.venv/
-WEB/backend/*.egg-info/
-WEB/backend/.pytest_cache/
+### ============ WEB — BACKEND (FastAPI / Python) ============
+WEB/BACKEND/__pycache__/
+WEB/BACKEND/**/__pycache__/
+WEB/BACKEND/venv/
+WEB/BACKEND/.venv/
+WEB/BACKEND/*.egg-info/
+WEB/BACKEND/.pytest_cache/
 
 # Alembic — giữ lại thư mục versions, chỉ ignore cache nếu có
-WEB/backend/**/*.pyc
+WEB/BACKEND/**/*.pyc
 
-### ============ WEB — Frontend (React) ============
-WEB/frontend/node_modules/
-WEB/frontend/dist/
-WEB/frontend/build/
-WEB/frontend/.vite/
-WEB/frontend/*.local
+### ============ WEB — FRONTEND (React) ============
+WEB/FRONTEND/node_modules/
+WEB/FRONTEND/dist/
+WEB/FRONTEND/build/
+WEB/FRONTEND/.vite/
+WEB/FRONTEND/*.local
 
 ### ============ AI_CNN — Python + model + dataset ============
 AI_CNN/__pycache__/
@@ -50,7 +50,7 @@ AI_CNN/datasets/
 # Kết quả train (log, ảnh output của YOLO...)
 AI_CNN/runs/
 
-# Ảnh tạm lưu frame trước khi gửi lên backend
+# Ảnh tạm lưu frame trước khi gửi lên BACKEND
 AI_CNN/model
 AI_CNN/tmp_frames/
 AI_CNN/*.jpg

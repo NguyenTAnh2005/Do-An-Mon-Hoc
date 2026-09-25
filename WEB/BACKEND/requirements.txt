@@ -1,0 +1,45 @@
+# Framework backend API chính
+fastapi==0.128.0
+
+# Quản lý migration database (versioning schema DB)
+alembic==1.18.1
+
+# Hash password bằng thuật toán bcrypt
+# ĐÃ hạ phiên bản để tránh xung đột với passlib
+bcrypt==3.2.2
+
+# Thư viện mã hóa/giải mã, SSL, token crypto...
+cryptography==46.0.3
+
+
+# HTTP client để gọi API khác (async/sync request)
+httpx==0.28.1
+
+# Hỗ trợ hash & verify password tiện hơn
+# (thường dùng chung với bcrypt)
+passlib==1.7.4
+
+# Driver kết nối PostgreSQL cho Python
+psycopg2-binary==2.9.11
+
+# Quản lý config/settings bằng Pydantic
+# (đọc .env rất tiện)
+pydantic-settings==2.12.0
+
+# Validate  email
+email-validator==2.2.0
+
+# Làm JWT token (access token, auth)
+python-jose==3.5.0
+
+# Hỗ trợ upload file/form-data  -- Dùng OAuth2Form nên cần thằng này để gửi request form lên fastAPI
+python-multipart==0.0.21
+
+# ASGI server chạy FastAPI
+uvicorn==0.40.0
+
+# ORM & query database
+sqlalchemy==2.0.35
+
+# Cloudinary -- Dịch vụ lưu trữ ảnh
+cloudinary==1.45.0
