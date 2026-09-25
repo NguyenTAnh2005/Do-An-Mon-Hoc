@@ -1,5 +1,35 @@
-ultralytics
-opencv-python
-# Xem note tải torch 
-torch
-torchvision
+# ============================================================
+# requirements.txt — Thư viện Python cho AI_CNN
+# ============================================================
+# Cách cài:
+#     pip install -r requirements.txt
+#
+# ⚠️  LƯU Ý VỀ TORCH:
+#     torch/torchvision KHÔNG cài qua file này được với GPU CUDA.
+#     Phải cài riêng trước bằng lệnh trong DOCS/04-ai/cai-dat-pytorch-gpu.md:
+#         pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#     Sau đó mới chạy pip install -r requirements.txt
+# ============================================================
+
+
+# === Core AI ===
+ultralytics>=8.3.0          # YOLOv8 (đã test với v8.3+)
+opencv-python>=4.9.0        # cv2 — đọc camera, xử lý ảnh
+
+# === Config ===
+python-dotenv>=1.0.0        # Đọc file .env trong config.py
+
+# === MQTT (EMQX Cloud) ===
+paho-mqtt>=2.0.0            # MQTT client — publish lên EMQX
+
+# === HTTP (gửi ảnh lên backend) ===
+requests>=2.31.0            # POST ảnh multipart tới FastAPI
+
+
+# ============================================================
+# KHÔNG ĐƯỢC XÓA 4 DÒNG DƯỚI — cài riêng qua PyTorch index URL
+# (Xem hướng dẫn DOCS/04-ai/cai-dat-pytorch-gpu.md)
+# ============================================================
+# torch
+# torchvision
+# torchaudio
