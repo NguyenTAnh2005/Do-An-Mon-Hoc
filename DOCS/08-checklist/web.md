@@ -2,13 +2,12 @@
 
 **Module 0 — Nền tảng**
 
-- [ ] Khởi tạo repo, cấu trúc thư mục `web/`
+- [x] Khởi tạo repo, cấu trúc thư mục `web/`
 - [ ] Setup FastAPI + React project
-- [ ] Setup PostgreSQL, PgAdmin, Alembic
-- [ ] Setup Cloudinary (API key)
-- [ ] Setup Mosquitto broker để test
-- [ ] Viết model/migration tạo bảng DB (Alembic)
-- [ ] Seed dữ liệu mẫu (2 khu vực, 6 thùng, `mqtt_topic_*`, `chieu_cao_H_cm`) + 1 tài khoản admin
+- [x] Setup PostgreSQL, PgAdmin, Alembic
+- [x] Setup Cloudinary (API key)
+- [x] Viết model/migration tạo bảng DB (Alembic)
+- [x] Seed dữ liệu mẫu (2 khu vực, 6 thùng, `mqtt_topic_*`, `chieu_cao_H_cm`) + 1 tài khoản admin
 
 **Module 1 — Error handling + Auth**
 
