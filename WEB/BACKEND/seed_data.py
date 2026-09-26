@@ -1,27 +1,27 @@
-from app.db_connection import SessionLocal  # TODO: đổi theo đúng path SessionLocal của dự án
+from app.db_connection import SessionLocal  # TODO: adjust to match the project's actual SessionLocal path
 
-from app.seed.tai_khoan import seed_tai_khoan
-from app.seed.khu_vuc import seed_khu_vuc
-from app.seed.thung_rac import seed_thung_rac
-from app.seed.lich_su_phan_loai import seed_lich_su_phan_loai
+from app.seed.account import seed_account
+from app.seed.area import seed_area
+from app.seed.trash_bin import seed_trash_bin
+from app.seed.classification_log import seed_classification_log
 
 
 def run_seed():
     db = SessionLocal()
-    print("📢 Bắt đầu seed data ...........")
+    print("📢 Starting seed data ...........")
     try:
-        seed_tai_khoan(db)
-        seed_khu_vuc(db)
-        db.flush()  # cần id của khu_vuc để gán FK cho thung_rac / lich_su_phan_loai bên dưới
+        seed_account(db)
+        seed_area(db)
+        db.flush()  # need area ids to assign FK for trash_bin / classification_log below
 
-        seed_thung_rac(db)
-        seed_lich_su_phan_loai(db)
+        seed_trash_bin(db)
+        seed_classification_log(db)
 
         db.commit()
-        print("✅ Seed data thành công, đã commit toàn bộ!")
+        print("✅ Seed data succeeded, everything committed!")
     except Exception as e:
         db.rollback()
-        print(f"❌ Oops, lỗi khi seed: {e}")
+        print(f"❌ Oops, error while seeding: {e}")
     finally:
         db.close()
 

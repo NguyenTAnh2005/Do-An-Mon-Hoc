@@ -1,6 +1,6 @@
 from app.core.config import settings
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import sessionmaker
 
 # Find DB Url 
 # (Load đường dẫn lưu trữ database từ pydantic setting)

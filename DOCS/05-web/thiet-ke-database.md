@@ -9,42 +9,42 @@ Liên quan: [Kiến trúc Backend realtime](./kien-truc-backend-realtime.md) · 
 ## Schema
 
 ```
-tai_khoan (id, ten_dang_nhap, mat_khau_hash)
+account (id, username, email, password_hash)
 
-khu_vuc (
+area (
   id,
-  mo_ta_vi_tri,
-  mqtt_topic_phanloai,        -- full topic, vd: truong/khu1/phanloai
-  mqtt_topic_trangthai_iot,   -- full topic, vd: truong/khu1/trangthai/iot
-  mqtt_topic_trangthai_ai,    -- full topic, vd: truong/khu1/trangthai/ai
-  iot_online          BOOLEAN,
-  ai_online           BOOLEAN,
-  iot_lan_cuoi_online TIMESTAMP,
-  ai_lan_cuoi_online  TIMESTAMP
+  location_description,
+  mqtt_topic_classification,  -- full topic, e.g. truong/khu1/phanloai
+  mqtt_topic_status_iot,      -- full topic, e.g. truong/khu1/trangthai/iot
+  mqtt_topic_status_ai,       -- full topic, e.g. truong/khu1/trangthai/ai
+  iot_online       BOOLEAN,
+  ai_online        BOOLEAN,
+  iot_last_online  TIMESTAMP,
+  ai_last_online   TIMESTAMP
 )
 
-enum loai_rac (tai_che, huu_co, vo_co)
+enum waste_type (recyclable, organic, inorganic)
 
-thung_rac (
+trash_bin (
   id,
-  khu_vuc_id,
-  loai_rac,
-  mqtt_topic_mucday,            -- full topic riêng của từng thùng, vd: truong/khu1/mucday/huuco
-  chieu_cao_H_cm,                -- dùng để tính % đầy
-  phan_tram_day_hien_tai,        -- ghi đè, KHÔNG lưu lịch sử theo thời gian
-  cap_nhat_luc
+  area_id,
+  waste_type,
+  mqtt_topic_fill_level,       -- full topic per bin, e.g. truong/khu1/mucday/huuco
+  height_cm,                    -- used to compute fill %
+  current_fill_percent,         -- overwritten in place, NOT stored as time-series history
+  updated_at
 )
 
-lich_su_phan_loai (
-  id            SERIAL PRIMARY KEY,   -- dùng join/hiển thị/phân trang bình thường
-  log_id        VARCHAR UNIQUE,        -- chỉ để ghép nối MQTT + ảnh (script AI tự sinh uuid)
-  khu_vuc_id,
-  loai_rac_nhan_dien,
-  do_chac_chan,
-  url_anh                          NULL,   -- null tạm tới khi ảnh HTTP về
+classification_log (
+  id            SERIAL PRIMARY KEY,   -- for normal join/display/pagination
+  log_id        VARCHAR UNIQUE,        -- only to correlate MQTT + image (AI script generates uuid)
+  area_id,
+  detected_waste_type,
+  confidence,
+  image_url                        NULL,   -- null until HTTP image upload arrives
   cloudinary_public_id             NULL,
-  ket_qua_xac_nhan  enum (chua_xac_nhan / dung / sai),
-  thoi_gian
+  confirmation_result  enum (unconfirmed / correct / incorrect),
+  created_at
 )
 ```
 
