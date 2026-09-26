@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Dashboard from "../pages/Dashboard";
-import History from "../pages/History";
+import ClassificationHistory from "../pages/ClassificationHistory";
 import Statistics from "../pages/Statistics";
 import NotFound from "../pages/NotFound";
 
@@ -12,7 +12,7 @@ const ManageRoutes = () =>{
         <Routes>
             <Route element={<Layout/>}>
                 <Route index element={<Dashboard/>}/>
-                <Route path="history" element={<History/>}/>
+                <Route path="history" element={<ClassificationHistory/>}/>
                 <Route path="stats" element={<Statistics/>}/>
             </Route>
             <Route path="*" element={<NotFound/>}/>

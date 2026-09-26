@@ -10,126 +10,127 @@ from app.models.base import Base
 # ================================
 # Enum
 # ================================
-class LoaiRac(str, enum.Enum):
-    """Phân loại 3 loại rác — dùng cho cả thung_rac và lich_su_phan_loai."""
-    TAI_CHE = "tai_che"
-    HUU_CO = "huu_co"
-    VO_CO = "vo_co"
+class WasteType(str, enum.Enum):
+    """3 waste categories — used by both trash_bin and classification_log."""
+    RECYCLABLE = "recyclable"
+    ORGANIC = "organic"
+    INORGANIC = "inorganic"
 
 
-class KetQuaXacNhan(str, enum.Enum):
-    """Trạng thái xác nhận thủ công của quản lý cho 1 lượt nhận diện."""
-    CHUA_XAC_NHAN = "chua_xac_nhan"
-    DUNG = "dung"
-    SAI = "sai"
+class ConfirmationResult(str, enum.Enum):
+    """Manager's manual confirmation status for a classification record."""
+    UNCONFIRMED = "unconfirmed"
+    CORRECT = "correct"
+    INCORRECT = "incorrect"
 
 
 # ================================
-# 1. Bảng Tài khoản
+# 1. Account table
 # ================================
-class TaiKhoan(Base):
-    __tablename__ = "tai_khoan"
+class Account(Base):
+    __tablename__ = "account"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    ten_dang_nhap: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
-    mat_khau_hash: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
 
     # Relationship
-    refresh_token: Mapped[list["RefreshToken"]] = relationship(back_populates="tai_khoan")
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(back_populates="account")
 
 
 # ================================
-# 2. Bảng Khu vực
+# 2. Area table
 # ================================
-class KhuVuc(Base):
-    __tablename__ = "khu_vuc"
+class Area(Base):
+    __tablename__ = "area"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    mo_ta_vi_tri: Mapped[str] = mapped_column(String(255), nullable=False)
+    location_description: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    # Full MQTT topic riêng cho từng khu vực — không nối chuỗi prefix (đã chốt)
-    mqtt_topic_phanloai: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    mqtt_topic_trangthai_iot: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    mqtt_topic_trangthai_ai: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    # Full MQTT topic per area — not built by concatenating a prefix (finalized decision)
+    mqtt_topic_classification: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    mqtt_topic_status_iot: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    mqtt_topic_status_ai: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
 
-    # Trạng thái online tách riêng IoT / AI, cập nhật qua LWT
+    # Online status tracked separately for IoT / AI, updated via LWT
     iot_online: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     ai_online: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    iot_lan_cuoi_online: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    ai_lan_cuoi_online: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    iot_last_online: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ai_last_online: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationship
-    thung_rac: Mapped[list["ThungRac"]] = relationship(back_populates="khu_vuc")
-    lich_su_phan_loai: Mapped[list["LichSuPhanLoai"]] = relationship(back_populates="khu_vuc")
+    trash_bins: Mapped[list["TrashBin"]] = relationship(back_populates="area")
+    classification_logs: Mapped[list["ClassificationLog"]] = relationship(back_populates="area")
 
 
 # ================================
-# 3. Bảng Thùng rác
+# 3. Trash bin table
 # ================================
-class ThungRac(Base):
-    __tablename__ = "thung_rac"
+class TrashBin(Base):
+    __tablename__ = "trash_bin"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    khu_vuc_id: Mapped[int] = mapped_column(ForeignKey("khu_vuc.id"), nullable=False, index=True)
+    area_id: Mapped[int] = mapped_column(ForeignKey("area.id"), nullable=False, index=True)
 
-    loai_rac: Mapped[LoaiRac] = mapped_column(SQLEnum(LoaiRac, name="loai_rac_enum"), nullable=False)
+    waste_type: Mapped[WasteType] = mapped_column(SQLEnum(WasteType, name="waste_type_enum"), nullable=False)
 
-    # Full MQTT topic riêng của từng thùng, vd: truong/khu1/mucday/huuco
-    mqtt_topic_mucday: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    # Full MQTT topic per bin, e.g. truong/khu1/mucday/huuco
+    mqtt_topic_fill_level: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
 
-    chieu_cao_H_cm: Mapped[float] = mapped_column(Float, nullable=False)
-    # % đầy = (H - d) / H * 100, ghi đè liên tục — KHÔNG lưu lịch sử theo thời gian (đã chốt)
-    phan_tram_day_hien_tai: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
-    cap_nhat_luc: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    height_cm: Mapped[float] = mapped_column(Float, nullable=False)
+    # fill % = (H - d) / H * 100, overwritten in place — NOT stored as time-series history (finalized decision)
+    current_fill_percent: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationship
-    khu_vuc: Mapped["KhuVuc"] = relationship(back_populates="thung_rac")
+    area: Mapped["Area"] = relationship(back_populates="trash_bins")
 
 
 # ================================
-# 4. Bảng Lịch sử phân loại
+# 4. Classification log table
 # ================================
-class LichSuPhanLoai(Base):
-    __tablename__ = "lich_su_phan_loai"
+class ClassificationLog(Base):
+    __tablename__ = "classification_log"
 
-    # PK tự tăng dùng để join/hiển thị/phân trang bình thường
+    # Auto-increment PK, used for normal join/display/pagination
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # UUID do script AI tự sinh, chỉ dùng để ghép nối MQTT + ảnh (KHÔNG dùng làm PK)
+    # UUID generated by the AI script, only used to correlate MQTT + image (NOT used as PK)
     log_id: Mapped[str] = mapped_column(String(36), unique=True, index=True, nullable=False)
 
-    khu_vuc_id: Mapped[int] = mapped_column(ForeignKey("khu_vuc.id"), nullable=False, index=True)
+    area_id: Mapped[int] = mapped_column(ForeignKey("area.id"), nullable=False, index=True)
 
-    loai_rac_nhan_dien: Mapped[LoaiRac] = mapped_column(SQLEnum(LoaiRac, name="loai_rac_enum"), nullable=False)
-    do_chac_chan: Mapped[float] = mapped_column(Float, nullable=False)
+    detected_waste_type: Mapped[WasteType] = mapped_column(SQLEnum(WasteType, name="waste_type_enum"), nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, nullable=False)
 
-    # NULL tạm tới khi ảnh HTTP (multipart) về, Backend update theo log_id (luồng ảnh tách kênh)
-    url_anh: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # NULL until the HTTP (multipart) image arrives, Backend updates it by log_id (separate image channel)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     cloudinary_public_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    ket_qua_xac_nhan: Mapped[KetQuaXacNhan] = mapped_column(
-        SQLEnum(KetQuaXacNhan, name="ket_qua_xac_nhan_enum"),
-        default=KetQuaXacNhan.CHUA_XAC_NHAN,
+    confirmation_result: Mapped[ConfirmationResult] = mapped_column(
+        SQLEnum(ConfirmationResult, name="confirmation_result_enum"),
+        default=ConfirmationResult.UNCONFIRMED,
         nullable=False,
     )
 
-    thoi_gian: Mapped[datetime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
     # Relationship
-    khu_vuc: Mapped["KhuVuc"] = relationship(back_populates="lich_su_phan_loai")
+    area: Mapped["Area"] = relationship(back_populates="classification_logs")
 
 
 # ================================
-# 5. Bảng Refresh Token
+# 5. Refresh token table
 # ================================
 class RefreshToken(Base):
     __tablename__ = "refresh_token"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    tai_khoan_id: Mapped[int] = mapped_column(
-        ForeignKey("tai_khoan.id", ondelete="CASCADE"), index=True, nullable=False
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), index=True, nullable=False
     )
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -137,4 +138,4 @@ class RefreshToken(Base):
     revoked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationship
-    tai_khoan: Mapped["TaiKhoan"] = relationship(back_populates="refresh_token")
+    account: Mapped["Account"] = relationship(back_populates="refresh_tokens")

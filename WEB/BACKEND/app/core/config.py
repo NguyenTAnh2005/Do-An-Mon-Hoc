@@ -14,16 +14,13 @@ class Settings(BaseSettings):
     # Biến refresh token lưu trên Cookie
     REFRESH_TOKEN_KEY_COOKIE : str = "refresh_token"
     
-    # Tài khoản Admin seed data
-    ST_ADMIN_EMAIL:str
-    ST_ADMIN_PASSWORD: str
+    # Tài khoản Manager seed data
+    ST_EMAIL:str
+    ST_USERNAME: str
+    ST_PASSWORD: str
 
 
     # Cloudinary Service
-    CLOUDINARY_NAME: str
-    CLOUDINARY_API_KEY: str
-    CLOUDINARY_API_SECRET: str
-
 
     class Config:
         env_file = ".env"
