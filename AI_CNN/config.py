@@ -14,6 +14,8 @@ Lưu ý:
     - Không commit file .env lên Git (chỉ commit .env.example).
     - CLASS_MAP phải khớp enum với IoT (Tường) và Web (Anh):
       tai_che / huu_co / vo_co — KHÔNG đổi tên khác.
+    - Tên class bên TRÁI trong CLASS_MAP phải khớp CHÍNH XÁC model.names
+      (in ra bằng: python check_classmap.py).
 """
 import os
 from pathlib import Path
@@ -61,7 +63,7 @@ MODEL_PATH = Path(__file__).parent / "model" / "yolo_v8_training" / "weights" / 
 # ⚠️  Tên bên trái PHẢI khớp CHÍNH XÁC với model.names (in ra từ YOLO)
 # ⚠️  Tên bên phải PHẢI khớp với IoT (Tường) + Web (Anh) — không đổi
 CLASS_MAP = {
-    "recyclable waste": "tai_che",     # Tái chế
+    "recyclable waste": "tai_che",     # ⚠️ DẤU CÁCH, không phải gạch ngang
     "organic-waste":    "huu_co",      # Hữu cơ
     "inorganic-waste":  "vo_co",       # Vô cơ
 }
@@ -97,8 +99,11 @@ DIFF_WARMUP = 30        # số frame đầu để build background
 # ============================================================
 # 6. ROI — vùng nhận diện ở giữa khung
 # ============================================================
-ROI_SIZE = 280          # kích thước cạnh vuông ROI (pixel)
-# nếu chạy bằng GPU thì chỉnh lên 640
+# Đọc từ .env để linh hoạt giữa máy test (yếu) và máy demo (GPU):
+#   - Máy CPU (test logic): ROI_SIZE=280  → ~10 FPS
+#   - Máy GPU (demo thật):  ROI_SIZE=640  → ~30-50 FPS
+# Mặc định 640 nếu không có trong .env
+ROI_SIZE = int(os.getenv("ROI_SIZE", "640"))
 
 
 # ============================================================
@@ -112,13 +117,17 @@ LOCAL_IMAGE_DIR.mkdir(exist_ok=True)
 # 8. MQTT TOPIC TEMPLATE
 # ============================================================
 def topic_phanloai(khu_vuc: int) -> str:
+    """Topic publish kết quả phân loại thành công."""
     return f"truong/khu{khu_vuc}/phanloai"
 
 def topic_khongchac(khu_vuc: int) -> str:
+    """Topic publish tín hiệu 'không tự tin'."""
     return f"truong/khu{khu_vuc}/khongchac"
 
 def topic_trangthai_ai(khu_vuc: int) -> str:
+    """Topic LWT của AI script (online/offline)."""
     return f"truong/khu{khu_vuc}/trangthai/ai"
 
 def topic_mucday(khu_vuc: int, loai_rac: str) -> str:
+    """Topic publish mức đầy — ESP32 dùng topic này."""
     return f"truong/khu{khu_vuc}/mucday/{loai_rac}"
