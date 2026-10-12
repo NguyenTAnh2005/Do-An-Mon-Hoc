@@ -48,8 +48,8 @@ if _missing:
 # 2. PHẦN CỨNG — khác nhau giữa 2 khu
 # ============================================================
 CAMERAS = {
-    1: "http://192.168.1.10:8080/video",   # Khu A — IP Webcam
-    2: "http://192.168.1.11:8080/video",   # Khu B — IP Webcam
+     1:"http://192.168.0.3:4747/video",   # Khu A — IP Webcam
+     2:"http://192.168.0.2:4747/video",   # Khu B — IP Webcam
 }
 
 
@@ -57,7 +57,7 @@ CAMERAS = {
 # 3. MODEL & CLASS MAPPING
 # ============================================================
 # Đường dẫn tới file weights đã train xong
-MODEL_PATH = Path(__file__).parent / "model" / "yolo_v8_training" / "weights" / "v1-best.pt"
+MODEL_PATH = Path(__file__).parent / "best.pt"
 
 # Map tên class gốc Roboflow → enum hệ thống
 # ⚠️  Tên bên trái PHẢI khớp CHÍNH XÁC với model.names (in ra từ YOLO)
