@@ -13,6 +13,7 @@ from app.core import password
 from app.crud import refresh_token as crud_token
 from app.schemas import refresh_token as schemas_token
 from app.schemas import account as schemas_account
+from app.schemas import auth as schemas_auth
 from app.crud import account as crud_account
 from app.models.models import RefreshToken
 
@@ -115,10 +116,10 @@ def refresh_access(db: Session, refresh_token: Optional[str] = None ):
     # 4. Nếu revoke = false -> đổi thành True 
     crud_token.update_revoked(db=db, db_token=db_token)
 
-    # -> tạo mới access_token  
+    # -> tạo mới access_token
     data = {
         "data": db_token.account_id,
-        "sub" : db_account.id
+        "sub" : str(db_account.id)
     }
     expires_delta_minute = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = jwt_service.create_jwt_token(data=data, expires_delta=expires_delta_minute)

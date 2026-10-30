@@ -1,6 +1,8 @@
 import  manualInstance from "./config/manualConfig";
 import  autoInstance from "./config/autoConfig";
 
+
+let refreshPromise = null;
 const END_POINT = '/auth';
 
 export const authService = {
@@ -14,8 +16,14 @@ export const authService = {
     },
 
     refreshToken: async()=>{
-        const response = await autoInstance.post(`${END_POINT}/refresh-access-token`);
-        return response;
+        if(!refreshPromise){
+            refreshPromise = autoInstance
+                .post(`${END_POINT}/refresh-access-token`)
+                .finally(()=>{
+                    refreshPromise=null;
+                });
+        }
+        return refreshPromise;
     },
 
     logOut: async() =>{

@@ -78,11 +78,12 @@ def get_current_account(token: str = Depends(oauth2_scheme), db: Session = Depen
                 error_code="INVALID_TOKEN",
                 message="Token không hợp lệ hoặc đã bị thay đổi!"
             )
-    except JWTError:
+    except JWTError as e:
+        print(f"--- JWT Auth Error Debug: {repr(e)} ---")
         raise AppException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             error_code="TOKEN_EXPIRED",
-            message="Phiên đăng nhập đã kết thúc, vui lòng đăng nhập lại!"
+            message=f"Phiên đăng nhập đã kết thúc, vui lòng đăng nhập lại! [{repr}]"
         )
     account = db.query(models.Account).filter(models.Account.id == account_id).first()
     if not account:
