@@ -6,10 +6,12 @@ import {
   CONFIRMATION_BADGE_CLASS,
 } from "../../constant/classificationHistory";
 import { animateFast, animateSlow, baseBorder, mutedText } from "../../utils/style";
+import { useNavigate } from "react-router-dom";
 
 const formatTime = (iso) => new Date(iso).toLocaleString("vi-VN");
 
 export default function HistoryTable({ items }) {
+  const navigate = useNavigate();
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
@@ -38,10 +40,11 @@ export default function HistoryTable({ items }) {
           {items.map((log) => {
             const percent = Math.round(log.confidence * 100);
             return (
-              <tr
-                key={log.id}
-                className={clsx(animateSlow, baseBorder, "border-t hover:bg-primary/5")}
-              >
+                <tr
+                  key={log.id}
+                  onClick={() => navigate(`/history/${log.id}`)}
+                  className={clsx(animateSlow, baseBorder, "cursor-pointer border-t hover:bg-primary/5")}
+                >
                 <td className="px-4 py-3">
                   {log.image_url ? (
                     <img

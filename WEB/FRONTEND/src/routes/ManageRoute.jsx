@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import ClassificationHistory from "../pages/ClassificationHistory";
 import Statistics from "../pages/Statistics";
+import ClassificationDetail from "../pages/ClassificationDetail";
+
 import NotFound from "../pages/NotFound";
 
 import Layout from "../layout/Layout";
@@ -14,6 +16,7 @@ const ManageRoutes = () =>{
                 <Route index element={<Dashboard/>}/>
                 <Route path="history" element={<ClassificationHistory/>}/>
                 <Route path="stats" element={<Statistics/>}/>
+                <Route path="history/:id" element={<ClassificationDetail/>}/>
             </Route>
             <Route path="*" element={<NotFound/>}/>
         </Routes>
