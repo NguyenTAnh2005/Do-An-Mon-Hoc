@@ -14,7 +14,7 @@ from app.services import account as logic_account
 BASE_URL = settings.BASE_API_URL
 
 router = APIRouter(
-    prefix=BASE_URL+"/accoount",
+    prefix=BASE_URL+"/account",
     tags=["Account"]
 )
 

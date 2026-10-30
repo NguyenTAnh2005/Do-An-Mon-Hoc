@@ -5,15 +5,15 @@ from app.models.models import Area
 AREA_DATA = [
     {
         "location_description": "Area 1 - Front yard",
-        "mqtt_topic_classification": "truong/khu1/phanloai",
-        "mqtt_topic_status_iot": "truong/khu1/trangthai/iot",
-        "mqtt_topic_status_ai": "truong/khu1/trangthai/ai",
+        "mqtt_topic_classification": "school/area1/classification",
+        "mqtt_topic_status_iot": "school/area1/status/iot",
+        "mqtt_topic_status_ai": "school/area1/status/ai",
     },
     {
         "location_description": "Area 2 - Back yard",
-        "mqtt_topic_classification": "truong/khu2/phanloai",
-        "mqtt_topic_status_iot": "truong/khu2/trangthai/iot",
-        "mqtt_topic_status_ai": "truong/khu2/trangthai/ai",
+        "mqtt_topic_classification": "school/area2/classification",
+        "mqtt_topic_status_iot": "school/area2/status/iot",
+        "mqtt_topic_status_ai": "school/area2/status/ai",
     },
 ]
 

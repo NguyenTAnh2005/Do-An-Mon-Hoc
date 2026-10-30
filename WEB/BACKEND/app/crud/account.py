@@ -32,7 +32,7 @@ def get_account_by_email(db: Session, email: EmailStr):
     if not db_account:
         raise AppException(
             status_code = status.HTTP_404_NOT_FOUND,
-            error_code="1 ACCOUNT_NOT_FOUND",
+            error_code="ACCOUNT_NOT_FOUND",
             message=f"❌ Account không tồn tại trong hệ thống!"
         )
     return db_account

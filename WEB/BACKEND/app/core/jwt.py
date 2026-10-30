@@ -16,6 +16,8 @@ from app.schemas.auth import TokenPayload
 from typing import Optional
 from app.core.config import settings
 
+from pydantic import ValidationError
+
 # ==========================================
 # 1. TẠO JWT TOKEN
 # ==========================================
@@ -90,3 +92,18 @@ def get_current_account(token: str = Depends(oauth2_scheme), db: Session = Depen
             message="Tài khoản không tồn tại trong hệ thống!"
         )
     return account
+
+# ==========================================
+# 3. GIẢI MÃ JWT CHO WEB SOCKET
+# ==========================================
+def get_account_from_token(token: str, db: Session) -> Optional[models.Account]:
+    """Bản dùng cho WebSocket: trả về Account hoặc None, không ném exception HTTP."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        token_data = TokenPayload(**payload)
+    except (JWTError, ValidationError):
+        return None
+    if token_data.data is None or token_data.sub is None:
+        return None
+    return db.query(models.Account).filter(models.Account.id == token_data.data).first()
+

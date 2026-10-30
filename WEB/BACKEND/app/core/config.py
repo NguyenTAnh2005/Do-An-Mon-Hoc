@@ -19,8 +19,21 @@ class Settings(BaseSettings):
     ST_USERNAME: str
     ST_PASSWORD: str
 
+    # Broker MQTT
+    BROKER_ADDRESS: str
+    MQTT_PORT: int
+
+    # Tài khoản Mqtt Client
+    CLIENT_USERNAME: str
+    CLIENT_PASSWORD: str
+    CLIENT_ID:str
+
 
     # Cloudinary Service
+    CLOUDINARY_NAME: str = "name"
+    CLOUDINARY_API_KEY: str = "key"
+    CLOUDINARY_API_SECRET: str = "secret_key"
+    
 
     class Config:
         env_file = ".env"

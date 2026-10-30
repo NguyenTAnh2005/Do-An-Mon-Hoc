@@ -1,0 +1,58 @@
+@startuml 
+skinparam Dpi 300
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowFontSize 13
+skinparam ArrowThickness 1.5
+skinparam RoundCorner 12
+skinparam Padding 6
+skinparam nodesep 45
+skinparam ranksep 50
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam database {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam cloud {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+actor "Người dùng" as U
+rectangle "Camera" as CAM
+rectangle "Module AI\n(YOLO v8n)" as AI
+rectangle "EMQX Broker\n(serverless)" as BR #E8F0FE
+rectangle "ESP32\n3 servo\n3 cảm biến HC-SR04\n2 đèn LED (xanh, đỏ)" as ESP
+rectangle "Backend\n(FastAPI)" as BE
+database "PostgreSQL" as DB
+cloud "Cloudinary" as CL
+rectangle "Frontend\n(React)" as FE
+
+' Hàng 1
+U -right-> CAM : đặt rác\nvào khay
+CAM -right-> AI : frame ảnh \n(liên tục)
+
+' MQTT (nét liền, hai chiều)
+AI <-down-> BR : MQTT
+ESP <-right-> BR : MQTT
+BE <-up-> BR : MQTT
+
+' HTTP (nét đứt)
+AI -[dashed]-> BE : ảnh\n(HTTP)
+BE -[dashed]-> CL : ảnh\n(HTTP)
+
+' Cơ sở dữ liệu
+BE -left-> DB
+
+' WebSocket (nét đậm, màu xanh)
+BE -right[bold,#1565C0]-> FE : WebSocket
+
+@enduml
