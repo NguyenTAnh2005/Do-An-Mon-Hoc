@@ -1,0 +1,84 @@
+@startuml
+left to right direction
+
+' ===== Độ nét & kích thước =====
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 15
+skinparam packageStyle rectangle
+skinparam nodesep 25
+skinparam ranksep 60
+skinparam maxMessageSize 150
+skinparam TitleFontSize 20
+
+skinparam ArrowColor #1E88E5
+skinparam ArrowThickness 1.5
+skinparam usecase {
+BackgroundColor #E3F2FD
+BorderColor #1E88E5
+}
+skinparam actor {
+BackgroundColor #FFFFFF
+BorderColor #000000
+}
+skinparam rectangle {
+BackgroundColor #FAFAFA
+BorderColor #546E7A
+}
+
+title Sơ đồ Use Case Tổng Quát (General Use Case Diagram)
+
+actor "Người bỏ rác" as User
+actor "Hệ thống AI\n(Camera & YOLOv8)" as AI
+actor "Thiết bị IoT\n(ESP32 & Cảm biến)" as IoT
+actor "Quản trị viên" as Admin
+
+rectangle "Hệ thống Phân loại và Quản lý rác thông minh" {
+
+    rectangle "Người dùng" as G1 {
+        usecase "Bỏ rác vào\nkhay camera" as UC1
+        usecase "Phân loại rác thủ công\n(Khi báo LED đỏ)" as UC2
+    }
+
+    rectangle "Xử lý AI" as G2 {
+        usecase "Nhận diện & phân loại\nloại rác" as UC3
+        usecase "Truyền kết quả MQTT\n& gửi ảnh" as UC4
+        usecase "Gửi tín hiệu\nkhông tự tin" as UC12
+    }
+
+    rectangle "Thiết bị IoT" as G3 {
+        usecase "Đo & cập nhật\nmức đầy rác" as UC5
+        usecase "Tự động điều khiển\nmở/đóng nắp" as UC6
+        usecase "Bật tắt LED\n(Xanh/Đỏ)" as UC7
+        usecase "Gửi trạng thái\nOnline/Offline (LWT)" as UC8
+    }
+
+    rectangle "Quản trị" as G4 {
+        usecase "Theo dõi Dashboard Realtime\n(Mức đầy, Trạng thái thiết bị)" as UC9
+        usecase "Xem lịch sử &\nthống kê phân loại" as UC10
+        usecase "Quản lý dữ liệu ảnh\n(Upload thủ công ảnh lỗi mạng)" as UC11
+        usecase "Xóa dữ liệu\nhàng loạt" as UC13
+    }
+
+}
+
+' Bên trái
+User --> UC1
+User --> UC2
+AI --> UC3
+AI --> UC4
+AI --> UC12
+
+' Bên phải
+UC5 <-- IoT
+UC6 <-- IoT
+UC7 <-- IoT
+UC8 <-- IoT
+UC9 <-- Admin
+UC10 <-- Admin
+UC11 <-- Admin
+UC13 <-- Admin
+
+@enduml

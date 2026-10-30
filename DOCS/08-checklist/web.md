@@ -11,8 +11,8 @@
 
 **Module 1 — Error handling + Auth**
 
-- [ ] BE: Error/Success response config, JWT access + refresh token, schemas/crud/service auth
-- [ ] FE: Axios config, Auth Context, Protected routes, trang đăng nhập
+- [x] BE: Error/Success response config, JWT access + refresh token, schemas/crud/service auth
+- [x] FE: Axios config, Auth Context, Protected routes, trang đăng nhập
 
 **Module 2 — Dashboard realtime**
 

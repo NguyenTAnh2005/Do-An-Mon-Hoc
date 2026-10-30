@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowFontSize 13
+skinparam ArrowThickness 1.5
+skinparam RoundCorner 12
+skinparam Padding 6
+skinparam nodesep 40
+skinparam ranksep 60
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+actor "Người bỏ rác" as U
+rectangle "Camera và AI\n(YOLOv8n)" as AI
+rectangle "ESP32\n(servo, HC-SR04, LED)" as ESP
+rectangle "Dashboard\n(React)" as FE
+rectangle "Backend\n(FastAPI, PostgreSQL)" as BE
+
+U -right-> AI : bỏ rác
+AI -right-> ESP : kết quả phân loại\n(MQTT)
+AI -down-> BE : hình ảnh\n(HTTP)
+ESP -down-> BE : mức đầy,\ntrạng thái (MQTT)
+BE -left-> FE : thời gian thực
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+skinparam Dpi 600
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowFontSize 13
+skinparam ArrowThickness 1.5
+skinparam RoundCorner 12
+skinparam Padding 6
+skinparam nodesep 40
+skinparam ranksep 90
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+rectangle "Camera và AI\n(Publisher)" as AI
+rectangle "Broker\n(Mosquitto)" as BR #E8F0FE
+rectangle "Backend\n(Subscriber)" as BE
+rectangle "ESP32\n(Publisher và Subscriber)" as ESP
+
+AI -right-> BR : publish\ntruong/khu1/phanloai
+BR -right-> BE : subscribe\ntruong/khu1/#
+ESP -up-> BR : publish\ntruong/khu1/mucday/...
+BR -down-> ESP : subscribe\ntruong/khu1/phanloai
+@enduml

@@ -1,0 +1,3 @@
+- Thay đổi sang tiếng anh đồng nhất ở topic mqtt, class cnn, database, fe sẽ tự động dịch qua tiếng việt qua map sau cùng.
+- Tạm thời Rest cái có dữ liệu rác mới, chưa dùng WS ví ko đủ khả năng. Trước hết thì Fe tự refresh sau nầy có TG thì nâng cấp WS sẽ đẩy thông báo để fe biết refresh đúng lúc nhưng nâng cấp cũng đòi hỏi thêm về trình độ 1 chút.
+-
