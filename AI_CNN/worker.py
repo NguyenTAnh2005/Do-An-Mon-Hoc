@@ -1,29 +1,57 @@
-"""
-worker.py — Entry point chạy thật.
+"""Chạy vòng lặp phân loại AI cho một khu thu gom rác"""
 
-Cách chạy:
-    python worker.py 1     # chạy khu A
-    python worker.py 2     # chạy khu B
-"""
-import sys
-from config import CAMERAS, MODEL_PATH, ...
+import argparse
+
+from ultralytics import YOLO
+
+from config import CAMERAS, CLASS_MAP, DIFF_WARMUP, MODEL_PATH
+from core.camera import CameraStream
+from core.detector import Detector
+from core.frame_diff import FrameDiffer
+from core.mqtt_pub import MqttPublisher
+from core.uploader import Uploader
+
 
 def main(khu_vuc: int):
     if khu_vuc not in CAMERAS:
-        print(f"❌ Khu vực {khu_vuc} không tồn tại. Chọn 1 hoặc 2.")
-        sys.exit(1)
+        raise ValueError(f"Unknown area: {khu_vuc}")
+    if not MODEL_PATH.is_file():
+        raise FileNotFoundError(f"Model weights missing: {MODEL_PATH}")
 
-    print(f"🚀 Khởi động AI cho khu vực {khu_vuc}")
-    # ... phần còn lại
-    cam = CameraStream(CAMERAS[khu_vuc], name=f"khu{khu_vuc}")
-    pub = MqttPublisher(khu_vuc=khu_vuc)
-    # ...
+    model = YOLO(str(MODEL_PATH))
+    missing = set(CLASS_MAP) - set(model.names.values())
+    if missing:
+        raise ValueError(f"Model class names do not match CLASS_MAP: {sorted(missing)}")
+
+    camera = publisher = uploader = None
+    try:
+        camera = CameraStream(CAMERAS[khu_vuc], name=f"area{khu_vuc}")
+        publisher = MqttPublisher(khu_vuc)
+        uploader = Uploader()
+        differ = FrameDiffer()
+        detector = Detector(khu_vuc, model, publisher, uploader)
+        print(f"[AI-area{khu_vuc}] Keep tray empty for the first {DIFF_WARMUP} frames")
+
+        while True:
+            frame = camera.read()
+            if frame is None:
+                continue
+            detector.process(frame, differ.has_object(frame))
+    except KeyboardInterrupt:
+        print(f"[AI-area{khu_vuc}] Stopping")
+    finally:
+        if camera is not None:
+            camera.release()
+        if uploader is not None:
+            uploader.close()
+        if publisher is not None:
+            try:
+                publisher.publish_offline()
+            finally:
+                publisher.disconnect()
+
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Cách dùng: python worker.py <khu_vuc>")
-        print("Ví dụ: python worker.py 1")
-        sys.exit(1)
-    
-    khu_vuc = int(sys.argv[1])
-    main(khu_vuc)
+    parser = argparse.ArgumentParser(description="Run AI waste classification for one area")
+    parser.add_argument("area", type=int, choices=CAMERAS)
+    main(parser.parse_args().area)

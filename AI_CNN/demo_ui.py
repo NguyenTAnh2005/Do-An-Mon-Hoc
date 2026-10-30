@@ -9,7 +9,7 @@ from ultralytics.nn.tasks import DetectionModel
 torch.serialization.add_safe_globals([DetectionModel])
 
 # 1. Load mô hình
-MODEL_PATH = Path.cwd()/ "model"/"yolo_v8_training"/"weights" / "v1-best.pt"
+MODEL_PATH = Path(__file__).resolve().parent / "best.pt"
 model = YOLO(MODEL_PATH)
 
 # 2. Mở Webcam

@@ -14,7 +14,7 @@ Output: KHÔNG return — side effect:
         - Gọi uploader.submit() để POST ảnh async.
 
 Ai dùng:
-    - worker.py gọi detector.process(frame) mỗi frame.
+    - worker.py gọi detector.process(frame, has_object) mỗi frame.
 
 Luồng state:
     IDLE      --(thấy object >= CONF_MIN)--> DETECTING
@@ -23,7 +23,7 @@ Luồng state:
     COOLDOWN  --(hết COOLDOWN_SEC)--> IDLE
 
 Interface publisher (do mqtt_pub.py cung cấp):
-    - publish_classification(log_id, loai_rac, confidence, timestamp)
+    - publish_classification(log_id, waste_type, confidence, timestamp)
     - publish_unsure()
 
 Interface uploader (do uploader.py cung cấp):
@@ -53,6 +53,8 @@ from config import (
     MIN_VOTES,
     DOMINANCE_RATIO,
     ROI_SIZE,
+    topic_classification,
+    topic_uncertain,
 )
 
 
@@ -108,9 +110,7 @@ class Detector:
         # Số frame liên tiếp không thấy object trong DETECTING
         self._miss_count = 0
 
-        # === Dedup (tránh publish trùng do bug) ===
-        # Set các log_id đã publish trong X giây gần đây
-        self._recent_log_ids = set()
+        self._tray_cleared = False
 
     # ============================================================
     # HELPER — Crop ROI + chạy YOLO
@@ -184,12 +184,13 @@ class Detector:
     # ============================================================
     # MAIN — Xử lý 1 frame
     # ============================================================
-    def process(self, frame):
+    def process(self, frame, has_object: bool):
         """
         Xử lý 1 frame — gọi từ worker.py mỗi frame.
 
         Args:
             frame: numpy array (BGR) — frame gốc từ camera
+            has_object: kết quả so sánh với ảnh nền khay trống
         """
         now = time.time()
 
@@ -200,7 +201,9 @@ class Detector:
         # STATE: COOLDOWN — chỉ đếm thời gian, không chạy YOLO
         # ============================================================
         if self.state == State.COOLDOWN:
-            if now >= self._cooldown_until:
+            if not has_object:
+                self._tray_cleared = True
+            if now >= self._cooldown_until and self._tray_cleared:
                 # Hết cooldown -> về IDLE
                 self.state = State.IDLE
                 self._reset_session()
@@ -210,6 +213,8 @@ class Detector:
         # STATE: IDLE — chạy YOLO, chờ có object
         # ============================================================
         if self.state == State.IDLE:
+            if not has_object:
+                return
             detections = self._run_yolo(frame_roi)
 
             if detections:
@@ -234,7 +239,7 @@ class Detector:
                 return
 
             # Còn trong cửa sổ -> chạy YOLO tiếp
-            detections = self._run_yolo(frame_roi)
+            detections = self._run_yolo(frame_roi) if has_object else []
 
             if detections:
                 # Có object -> reset miss_count
@@ -270,7 +275,7 @@ class Detector:
         Tích lũy 1 detection vào phiên hiện tại.
 
         Args:
-            cls_name: tên class hệ thống (tai_che/huu_co/vo_co)
+            cls_name: tên class hệ thống (recyclable/organic/inorganic)
             conf: confidence (0.0 - 1.0)
             frame_roi: frame ROI (sẽ copy nếu là best)
         """
@@ -344,12 +349,10 @@ class Detector:
         try:
             self.publisher.publish_classification(
                 log_id=log_id,
-                loai_rac=winner,
+                waste_type=winner,
                 confidence=conf,
                 timestamp=timestamp,
             )
-            # Ghi nhận log_id để dedup
-            self._recent_log_ids.add(log_id)
         except Exception as e:
             print(f"[Detector-khu{self.khu_vuc}] Loi publish MQTT: {e}")
 
@@ -374,6 +377,7 @@ class Detector:
         """Chuyển sang COOLDOWN và reset phiên."""
         self.state = State.COOLDOWN
         self._cooldown_until = time.time() + COOLDOWN_SEC
+        self._tray_cleared = False
         self._reset_session()
 
     def _reset_session(self):
@@ -414,17 +418,17 @@ if __name__ == "__main__":
         def __init__(self, khu_vuc):
             self.khu_vuc = khu_vuc
 
-        def publish_classification(self, log_id, loai_rac, confidence, timestamp):
+        def publish_classification(self, log_id, waste_type, confidence, timestamp):
             print(f"\n{'='*60}")
-            print(f"[MOCK PUBLISH] Topic: truong/khu{self.khu_vuc}/phanloai")
+            print(f"[MOCK PUBLISH] Topic: {topic_classification(self.khu_vuc)}")
             print(f"  log_id:     {log_id}")
-            print(f"  loai_rac:   {loai_rac}")
+            print(f"  waste_type: {waste_type}")
             print(f"  confidence: {confidence:.3f}")
             print(f"  timestamp:  {timestamp}")
             print(f"{'='*60}\n")
 
         def publish_unsure(self):
-            print(f"\n[MOCK PUBLISH] Topic: truong/khu{self.khu_vuc}/khongchac")
+            print(f"\n[MOCK PUBLISH] Topic: {topic_uncertain(self.khu_vuc)}")
             print(f"[MOCK PUBLISH] -> KHONG TU TIN\n")
 
     # ===== Mock Uploader =====
@@ -476,9 +480,8 @@ if __name__ == "__main__":
             # Bước 1: Lọc nhiễu
             has_obj = differ.has_object(frame)
 
-            # Bước 2: Nếu có cử động -> đưa vào detector
-            if has_obj:
-                detector.process(frame)
+            # Bước 2: cập nhật detector cả khi khay trống để xử lý COOLDOWN
+            detector.process(frame, has_obj)
 
             # ===== Hiển thị =====
             # Vẽ trạng thái state lên frame

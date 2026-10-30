@@ -77,10 +77,12 @@ class CameraStream:
 
             if not self.cap.isOpened():
                 print(f"[{self.name}] Thử backend MSMF...")
+                self.cap.release()
                 self.cap = cv2.VideoCapture(cam_index, cv2.CAP_MSMF)
 
             if not self.cap.isOpened():
                 print(f"[{self.name}] Thử backend DSHOW...")
+                self.cap.release()
                 self.cap = cv2.VideoCapture(cam_index, cv2.CAP_DSHOW)
         else:
             # IP camera — dùng FFMPEG để decode H.264/MJPEG ổn định
@@ -89,6 +91,7 @@ class CameraStream:
         # Kiểm tra mở thành công không
         if not self.cap.isOpened():
             print(f"[{self.name}] ❌ Không mở được camera: {self.url}")
+            self.cap.release()
             self.cap = None
             return False
 
@@ -187,7 +190,7 @@ if __name__ == "__main__":
     start_time = time.time()
     fps_display = 0.0
 
-    print("\n▶️  Bắt đầu đọc frame. Nhấn 'q' để thoát.\n")
+    print("\nBắt đầu đọc frame. Nhấn 'q' để thoát.\n")
 
     try:
         while True:
@@ -219,7 +222,7 @@ if __name__ == "__main__":
                 break
 
     except KeyboardInterrupt:
-        print("\n⚠️  Ctrl+C — thoát")
+        print("\nCtrl+C — thoát")
     finally:
         cam.release()
         cv2.destroyAllWindows()
