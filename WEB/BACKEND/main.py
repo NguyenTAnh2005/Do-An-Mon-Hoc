@@ -10,9 +10,28 @@ from app.core.config import settings
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import router 
-from app.api.endpoint_v1 import account, auth
+from app.api.endpoint_v1 import account, auth, websocket, dashboard, classification_log, statistics
 
-app = FastAPI()
+# Config Websocket
+import asyncio
+from contextlib import asynccontextmanager
+from app.mqtt import client as mqtt_client_service
+from app.websocket.manager import ConnectionManager
+
+
+# Gắn luồng chạy cho paho mqtt
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.manager = ConnectionManager()
+    loop = asyncio.get_running_loop()
+    mqtt_client_service.start(loop=loop, manager=app.state.manager)
+    try:
+        yield
+    finally:
+        mqtt_client_service.stop()
+
+app = FastAPI(lifespan=lifespan)   # thay cho app = FastAPI()
+
 
 # =========== Cấu hình CORS =================================================================
 # CORS dùng để cho phép Frontend gọi API từ Backend khi Frontend và Backend chạy khác origin.
@@ -41,6 +60,10 @@ app.add_middleware(
 # Thêm Router các API vào
 app.include_router(account.router)
 app.include_router(auth.router)
+app.include_router(websocket.router)
+app.include_router(dashboard.router)
+app.include_router(classification_log.router)
+app.include_router(statistics.router)
 
 # Endpoint giúp đóng gói Object được trả về là App Exception ( Từ 1 object --> JSON - ngôn ngữ giao tiếp chung giữa Front và Back)
 @app.exception_handler(AppException)

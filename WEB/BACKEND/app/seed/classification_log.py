@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.models import ClassificationLog, Area, WasteType, ConfirmationResult
 
-SAMPLE_COUNT = 150
+SAMPLE_COUNT = 200
 DAYS_BACK = 30
 
 
@@ -39,12 +39,12 @@ def seed_classification_log(db: Session):
 
         # Manual confirmation: mostly unconfirmed, remainder mostly correct / some incorrect
         roll = random.random()
-        if roll < 0.6:
+        if roll < 0.1:
             confirmation_result = ConfirmationResult.UNCONFIRMED
-        elif roll < 0.85:
-            confirmation_result = ConfirmationResult.CORRECT
-        else:
+        elif roll < 0.5:
             confirmation_result = ConfirmationResult.INCORRECT
+        else:
+            confirmation_result = ConfirmationResult.CORRECT
 
         db.add(
             ClassificationLog(
@@ -53,11 +53,11 @@ def seed_classification_log(db: Session):
                 detected_waste_type=waste_type,
                 confidence=confidence,
                 image_url=(
-                    f"https://res.cloudinary.com/df5mtvzkn/image/upload/v1790302346/Phan_loai_rac/journey-18-09_tyh0kk.jpg"
+                    f"https://res.cloudinary.com/df5mtvzkn/image/upload/v1793096753/Waste_Classification/test_img_extjeh.jpg"
                     if has_image
                     else None
                 ),
-                cloudinary_public_id=f"seed_{log_id}" if has_image else None,
+                cloudinary_public_id=f"Waste_Classification/test_img_extjeh" if has_image else None,
                 confirmation_result=confirmation_result,
                 created_at=created_at,
             )

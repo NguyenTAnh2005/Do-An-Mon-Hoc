@@ -77,7 +77,7 @@ def update_all_revoked(db:Session, user_id: int):
     -> Chứng tỏ ai đó đang xâm nhập (Chủ hoặc hacker đang gửi request qua)
     -> Xử lý an toàn -> revoked toàn bộ token hiện có của user
     """
-    query = db.query(RefreshToken).filter(RefreshToken.user_id == user_id)
+    query = db.query(RefreshToken).filter(RefreshToken.account_id == user_id)
     # Tôi chưa rành nhiều sql cũng như code dạng ntn , lúc thì all lúc thì ko
     query.update({RefreshToken.revoked: True}, synchronize_session='fetch')
 

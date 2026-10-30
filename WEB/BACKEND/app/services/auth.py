@@ -77,7 +77,7 @@ def _check_token_reused(db: Session, db_token: RefreshToken):
     -> Trả lỗi
     """
     if db_token.revoked == True:
-        crud_token.update_all_revoked(db=db, user_id=db_token.user_id)
+        crud_token.update_all_revoked(db=db, user_id=db_token.account_id)
         raise AppException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             error_code="INVALID_REFRESH_TOKEN",

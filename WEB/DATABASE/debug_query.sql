@@ -1,6 +1,10 @@
 -- Xóa dữ liệu và reset luôn cả bộ đếm ID về 1
 TRUNCATE TABLE 
-
+-- classification_log
+-- trash_bin
+-- area
+account
+-- refresh_token
 RESTART IDENTITY CASCADE;
 --TRUNCATE: Xóa sạch sành sanh dữ liệu nhưng giữ lại cấu trúc bảng.
 --RESTART IDENTITY: Đưa bộ đếm ID tự động tăng về lại số 1.
@@ -10,9 +14,7 @@ RESTART IDENTITY CASCADE;
 DROP SCHEMA public CASCADE; CREATE SCHEMA public;
 
 
-select * from tai_khoan;
-
-select * from khu_vuc;
-select * from thung_rac;
-select * from lich_su_phan_loai;
-select * from refresh_token;
+select * from account;
+select * from classification_log;
+select* from trash_bin;
+select*from area;

@@ -43,3 +43,9 @@ sqlalchemy==2.0.35
 
 # Cloudinary -- Dịch vụ lưu trữ ảnh
 cloudinary==1.45.0
+
+# paho mqtt để kết nối mqtt 
+paho-mqtt==2.1.0           
+
+# websockets 
+websockets==17.2.0

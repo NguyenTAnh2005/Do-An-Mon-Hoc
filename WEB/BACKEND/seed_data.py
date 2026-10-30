@@ -10,11 +10,11 @@ def run_seed():
     db = SessionLocal()
     print("📢 Starting seed data ...........")
     try:
-        seed_account(db)
-        seed_area(db)
-        db.flush()  # need area ids to assign FK for trash_bin / classification_log below
+        # seed_account(db)
+        # seed_area(db)
+        # db.flush()  # need area ids to assign FK for trash_bin / classification_log below
 
-        seed_trash_bin(db)
+        # seed_trash_bin(db)
         seed_classification_log(db)
 
         db.commit()

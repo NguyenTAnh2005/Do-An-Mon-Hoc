@@ -1,0 +1,121 @@
+@startuml erd_phan_loai_rac_auth_top
+
+' =====================================================
+' CONFIG
+' =====================================================
+skinparam dpi 150
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 60
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 20
+skinparam roundcorner 8
+skinparam shadowing false
+
+skinparam class {
+    BackgroundColor White
+    BorderColor #3b3939
+    ArrowColor #292929
+    AttributeFontSize 20
+    FontStyle bold
+}
+
+hide circle
+hide empty members
+
+' =====================================================
+' ENUMS
+' =====================================================
+enum WasteType {
+    recyclable
+    organic
+    inorganic
+}
+
+enum ConfirmationResult {
+    unconfirmed
+    correct
+    incorrect
+}
+
+' =====================================================
+' ENTITIES
+' =====================================================
+entity "account" as account {
+    * id : int <<PK>>
+    --
+    * username : varchar(50) <<unique>>
+    * email : varchar(255) <<unique>>
+    * password_hash : varchar
+}
+
+entity "refresh_token" as refresh_token {
+    * id : int <<PK>>
+    --
+    * account_id : int <<FK>>
+    * token_hash : varchar(255)
+    * expires_at : datetime
+    * created_at : datetime
+    * revoked : boolean
+}
+
+entity "area" as area {
+    * id : int <<PK>>
+    --
+    * location_description : varchar(255)
+    * mqtt_topic_classification : varchar(255) <<unique>>
+    * mqtt_topic_status_iot : varchar(255) <<unique>>
+    * mqtt_topic_status_ai : varchar(255) <<unique>>
+    * iot_online : boolean
+    * ai_online : boolean
+    iot_last_online : datetime
+    ai_last_online : datetime
+}
+
+entity "trash_bin" as trash_bin {
+    * id : int <<PK>>
+    --
+    * area_id : int <<FK>>
+    * waste_type : WasteType
+    * mqtt_topic_fill_level : varchar(255) <<unique>>
+    * height_cm : float
+    * current_fill_percent : float
+    updated_at : datetime
+}
+
+entity "classification_log" as classification_log {
+    * id : int <<PK>>
+    --
+    * log_id : varchar(36) <<unique>>
+    * area_id : int <<FK>>
+    * detected_waste_type : WasteType
+    * confidence : float
+    image_url : varchar(500)
+    cloudinary_public_id : varchar(255)
+    * confirmation_result : ConfirmationResult
+    * created_at : datetime
+}
+
+' =====================================================
+' LAYOUT 2 CỘT
+'   Hàng 1: account         - refresh_token
+'   Hàng 2: area            - trash_bin
+'   Hàng 3: classification_log - WasteType
+'   Hàng 4: ConfirmationResult (dưới classification_log)
+' =====================================================
+
+' Cụm Auth (hàng 1)
+account ||-right-o{ refresh_token : "1-n"
+account -[hidden]down- area
+
+' Cụm quản lý rác (hàng 2, 3)
+area ||-right-o{ trash_bin : "1-n"
+area ||-down-o{ classification_log : "1-n"
+
+' Enum
+trash_bin::waste_type .down.> WasteType
+classification_log::detected_waste_type .right.> WasteType
+classification_log::confirmation_result .down.> ConfirmationResult
+
+@enduml

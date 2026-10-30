@@ -4,10 +4,11 @@ from app.models.models import TrashBin, Area, WasteType
 
 DEFAULT_HEIGHT_CM = 50.0
 
+# Topic suffix = waste_type, identical to the value in DB / payload / API
 WASTE_TYPE_SLUG = {
-    WasteType.RECYCLABLE: "taiche",
-    WasteType.ORGANIC: "huuco",
-    WasteType.INORGANIC: "voco",
+    WasteType.RECYCLABLE: "recyclable",
+    WasteType.ORGANIC: "organic",
+    WasteType.INORGANIC: "inorganic",
 }
 
 
@@ -23,9 +24,9 @@ def seed_trash_bin(db: Session):
 
     count = 0
     for area in area_list:
-        area_n = area.mqtt_topic_classification.split("/")[1]  # "khu1", "khu2", ...
+        area_n = area.mqtt_topic_classification.split("/")[1]  # "area1", "area2", ...
         for waste_type, slug in WASTE_TYPE_SLUG.items():
-            topic = f"truong/{area_n}/mucday/{slug}"
+            topic = f"school/{area_n}/fill_level/{slug}"
             existing = db.query(TrashBin).filter(TrashBin.mqtt_topic_fill_level == topic).first()
             if existing:
                 continue
@@ -36,7 +37,7 @@ def seed_trash_bin(db: Session):
                     mqtt_topic_fill_level=topic,
                     height_cm=DEFAULT_HEIGHT_CM,
                     current_fill_percent=0.0,
-                )
+              )
             )
             count += 1
     print(f"✅ seed_trash_bin ready ({count} new bins)!")
