@@ -9,25 +9,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        // MÀU CHÍNH HỆ THỐNG — teal, gợi công nghệ + môi trường, tách biệt với các màu trạng thái bên dưới
-        primary: { DEFAULT: '#66BB6A', hover: '#57A55C' },
+        // MÀU CHÍNH — teal thật (hue ~174°), tách hẳn khỏi success
+        primary: { DEFAULT: '#0D9488', hover: '#0F766E' },
 
-        // MÀU TRẠNG THÁI (semantic) — dùng cho online/offline, mức đầy thùng, xác nhận đúng/sai...
-        success: { DEFAULT: '#22C55E', hover: '#16A34A' }, // online, an toàn, xác nhận đúng
-        danger:  { DEFAULT: '#EF4444', hover: '#DC2626' }, // offline, đầy thùng, xác nhận sai
-        warning: { DEFAULT: '#F59E0B', hover: '#D97706' }, // sắp đầy, cần chú ý
+        // MÀU TRẠNG THÁI — 3 gam tách biệt: green / rose / amber
+        success: { DEFAULT: '#16A34A', hover: '#15803D' },
+        danger:  { DEFAULT: '#E11D48', hover: '#BE123C' },
+        warning: { DEFAULT: '#F59E0B', hover: '#D97706' },
 
         light: {
-          bg: '#F7F7F6',
+          bg:      '#F5F8F8',   // trắng ngả teal rất nhẹ
           surface: '#FFFFFF',
-          text: '#1F1F1D',
-          muted: '#6E6E6B'
+          text:    '#0F1A1A',   // đen ngả teal nhẹ
+          muted:   '#5B6E6C'    // xám teal
         },
         dark: {
-          bg: '#16171A',
-          surface: '#1E1F23',
-          text: '#F2F2F0',
-          muted: '#93938E'
+          bg:      '#0F1416',   // đen ngả teal
+          surface: '#181E20',   // surface teal nhẹ
+          text:    '#F0F4F3',   // trắng teal
+          muted:   '#8AA19E'    // xám teal sáng
         },
       },
       fontFamily: {

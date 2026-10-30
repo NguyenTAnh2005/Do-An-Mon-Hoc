@@ -3,7 +3,9 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
-import { Menu, X, Recycle, LogOut, Loader2 } from "lucide-react";
+import {
+    Menu, X, Recycle, LogOut, Loader2, ChevronLeft, ChevronRight
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 import { ListNavItems, AppName } from "../constant/navigation";
@@ -11,7 +13,8 @@ import ThemeToggle from "../components/ui/ThemeToggle";
 import { authService } from "../services/auth";
 import { useAuth } from "../hooks/useAuth";
 import {
-    baseTextBg, animateSlow, animateFast, bgSurface, baseBorder, mutedText
+    baseTextBg, animateSlow, animateBase, animateFast,
+    bgSurface, baseBorder, mutedText
 } from "../utils/style";
 
 export const Layout = () => {
@@ -34,7 +37,7 @@ export const Layout = () => {
         setMobileOpen(false);
     }, [location]);
 
-    // Gọi getMe 1 lần khi Layout mount (Layout chỉ render sau khi AuthContext đã có accessToken)
+    // Gọi getMe 1 lần khi Layout mount
     useEffect(() => {
         let isMounted = true;
         const fetchMe = async () => {
@@ -58,14 +61,13 @@ export const Layout = () => {
         try {
             await logout();
             toast.success("🎉 Đăng xuất thành công!");
-            navigate("/login");
+            navigate("/log-in");
         } catch (error) {
             console.error("[Layout]: logout thất bại:", error);
             toast.error("Đăng xuất thất bại, vui lòng thử lại.");
         }
     };
 
-    // Trên mobile, drawer luôn full width nên label luôn hiện khi drawer mở
     const showLabel = expanded || mobileOpen;
 
     return (
@@ -77,18 +79,25 @@ export const Layout = () => {
                 "fixed top-0 left-0 right-0 z-50"
             )}>
                 <Link to="/" className="flex items-center gap-2">
-                    <span className="bg-primary text-white p-2 rounded-md">
+                    <span className="bg-primary text-white p-2 rounded-lg shadow-sm shadow-primary/30">
                         <Recycle size={20} />
                     </span>
                     <span className="text-lg font-bold">{AppName}</span>
                 </Link>
-                <button
-                    aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
-                    onClick={toggleMobile}
-                    className={clsx(animateFast, mutedText, "p-2 hover:text-primary cursor-pointer")}
-                >
-                    {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                <div className="flex items-center gap-1">
+                    <ThemeToggle />
+                    <button
+                        aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
+                        onClick={toggleMobile}
+                        className={clsx(
+                            animateFast, mutedText,
+                            "p-2 rounded-md hover:text-primary hover:bg-primary/10 cursor-pointer",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        )}
+                    >
+                        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
             </div>
 
             {/* BACKDROP — CHỈ HIỆN KHI DRAWER MOBILE MỞ */}
@@ -100,7 +109,7 @@ export const Layout = () => {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         onClick={() => setMobileOpen(false)}
-                        className="md:hidden fixed top-16 inset-x-0 bottom-0 bg-black/40 z-30"
+                        className="md:hidden fixed top-16 inset-x-0 bottom-0 bg-black/40 backdrop-blur-sm z-30"
                     />
                 )}
             </AnimatePresence>
@@ -108,19 +117,36 @@ export const Layout = () => {
             {/* SIDEBAR */}
             <aside
                 className={clsx(
-                    bgSurface, baseBorder, animateSlow,
-                    "border-r-2 flex flex-col justify-between shrink-0 overflow-hidden z-40",
+                    bgSurface, baseBorder, animateBase,
+                    "border-r-2 flex flex-col justify-between shrink-0 z-40",
                     "md:sticky md:top-0 md:h-screen md:translate-x-0",
                     expanded ? "md:w-64" : "md:w-20",
                     "fixed top-16 left-0 h-[calc(100vh-4rem)] w-64",
                     mobileOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
-                <div>
+                {/* TOGGLE — FLOATING PILL, DESKTOP ONLY */}
+                <button
+                    aria-label={expanded ? "Thu gọn sidebar" : "Mở rộng sidebar"}
+                    onClick={toggleExpanded}
+                    className={clsx(
+                        "hidden md:flex absolute -right-3 top-5 z-50",
+                        animateFast,
+                        "h-7 w-7 items-center justify-center rounded-full border-2",
+                        baseBorder, bgSurface,
+                        "text-light-muted dark:text-dark-muted",
+                        "hover:text-primary hover:border-primary cursor-pointer",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    )}
+                >
+                    {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                </button>
+
+                <div className="overflow-hidden">
                     {/* BRAND — ẨN TRÊN MOBILE VÌ ĐÃ CÓ Ở TOP BAR */}
                     <div className="hidden md:flex items-center p-4">
                         <Link to="/" className="flex items-center gap-2 overflow-hidden">
-                            <span className="shrink-0 bg-primary text-white p-2 rounded-md">
+                            <span className="shrink-0 bg-primary text-white p-2 rounded-lg shadow-md shadow-primary/30">
                                 <Recycle size={22} />
                             </span>
                             <AnimatePresence>
@@ -139,22 +165,19 @@ export const Layout = () => {
                         </Link>
                     </div>
 
-                    {/* NÚT ĐÓNG/MỞ — CHỈ CHO DESKTOP */}
-                    <div className="hidden md:block px-4 pb-2 pt-2">
-                        <button
-                            aria-label={expanded ? "Thu gọn sidebar" : "Mở rộng sidebar"}
-                            onClick={toggleExpanded}
-                            className={clsx(
-                                animateFast, baseBorder, mutedText,
-                                "border-2 flex items-center justify-center w-full p-2 rounded-md hover:text-primary hover:border-primary cursor-pointer"
-                            )}
-                        >
-                            {expanded ? <X size={20} /> : <Menu size={20} />}
-                        </button>
-                    </div>
-
                     {/* NAV ITEMS */}
-                    <div className="flex flex-col gap-1 px-3 mt-4">
+                    <nav
+                        aria-label="Điều hướng chính"
+                        className="flex flex-col gap-1 px-3 mt-4"
+                    >
+                        {expanded && (
+                            <span className={clsx(
+                                mutedText,
+                                "hidden md:block px-3 mb-1 text-xs font-semibold uppercase tracking-wider"
+                            )}>
+                                Menu
+                            </span>
+                        )}
                         {ListNavItems.map(item => (
                             <NavItem
                                 key={`nav-item-${item.link}`}
@@ -165,11 +188,11 @@ export const Layout = () => {
                                 expanded={showLabel}
                             />
                         ))}
-                    </div>
+                    </nav>
                 </div>
 
                 {/* CHÂN SIDEBAR — User info -> Logout -> Theme toggle -> Copyright */}
-                <div className={clsx(baseBorder, "border-t-2 flex flex-col gap-3 p-4")}>
+                <div className={clsx(baseBorder, "border-t-2 flex flex-col gap-3 p-4 overflow-hidden")}>
                     {/* USER INFO CARD */}
                     {loadingAccount ? (
                         <div className={clsx(mutedText, "flex items-center gap-3 px-1")}>
@@ -201,14 +224,16 @@ export const Layout = () => {
                         </div>
                     )}
 
-                    {/* LOGOUT — nút riêng, nổi bật */}
+                    {/* LOGOUT */}
                     <button
                         aria-label="Đăng xuất"
                         onClick={handleLogout}
+                        title={!showLabel ? "Đăng xuất" : undefined}
                         className={clsx(
                             animateFast,
                             "flex items-center gap-2 rounded-md border-2 border-red-500/40 px-3 py-2 text-red-500",
                             "hover:bg-red-500 hover:text-white hover:border-red-500 cursor-pointer",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500",
                             showLabel ? "justify-start" : "justify-center"
                         )}
                     >
@@ -216,7 +241,7 @@ export const Layout = () => {
                         {showLabel && <span className="text-sm font-medium">Đăng xuất</span>}
                     </button>
 
-                    {/* THEME TOGGLE — tách hàng riêng, luôn căn giữa */}
+                    {/* THEME TOGGLE */}
                     <div className="flex items-center justify-center">
                         <ThemeToggle />
                     </div>
@@ -248,9 +273,14 @@ const NavItem = ({ linkTo, content, location, Icon, expanded }) => {
     return (
         <Link
             to={linkTo}
+            title={!expanded ? content : undefined}
+            aria-current={isActive ? "page" : undefined}
             className={clsx(
                 animateFast, "relative flex items-center gap-3 px-3 py-2 rounded-md",
-                isActive ? "bg-primary/10 text-primary font-semibold" : clsx(mutedText, "hover:text-primary")
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                isActive
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : clsx(mutedText, "hover:bg-primary/5 hover:text-primary")
             )}
         >
             <Icon size={22} className="shrink-0" />
