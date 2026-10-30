@@ -1,27 +1,59 @@
-"""
-uploader.py — Gửi ảnh bất đồng bộ (không block AI loop).
+"""Upload classification images without blocking the camera loop."""
 
-Nhiệm vụ:
-    - Nhận ảnh → đẩy vào queue → worker thread upload lên backend.
-    - Nếu lỗi mạng → lưu local theo log_id để upload thủ công sau.
+import queue
+import threading
+import uuid
 
-Input:  log_id (str), image_bytes (bytes)
-Output: HTTP POST tới backend, hoặc lưu local_images/{log_id}/
+import requests
 
-Ai dùng:
-    - detector.py gọi uploader.submit() sau khi publish MQTT.
+from config import BACKEND_URL, LOCAL_IMAGE_DIR
 
-Tại sao cần queue + thread:
-    - POST ảnh mất 1-3s (upload Cloudinary) → nếu POST trong AI loop
-      sẽ block → frame tiếp theo bị bỏ lỡ.
-    - Queue + worker thread → AI loop không bị ảnh hưởng.
 
-⚠️  LƯU Ý:
-    - KHÔNG retry tự động (theo doc nhóm đã chốt).
-    - Lỗi mạng → lưu local_images/{log_id}/frame.jpg + meta.txt.
-    - Quản lý sẽ upload thủ công qua FE sau.
+class Uploader:
+    def __init__(self):
+        # shortcut: queued images live in memory until upload fails, persist before enqueue if crash recovery is required.
+        self.queue = queue.Queue(maxsize=16)
+        self.thread = threading.Thread(target=self._run, daemon=True)
+        self.thread.start()
 
-Nhánh độc lập với MQTT:
-    - Backend nhận ảnh trước/sau MQTT đều OK.
-    - Dùng log_id để nối 2 luồng lại ở DB.
-"""
+    def submit(self, log_id: str, image_bytes: bytes):
+        uuid.UUID(log_id)
+        try:
+            self.queue.put_nowait((log_id, image_bytes))
+        except queue.Full:
+            self._save_local(log_id, image_bytes)
+
+    def _run(self):
+        while True:
+            item = self.queue.get()
+            try:
+                if item is None:
+                    return
+                log_id, image_bytes = item
+                try:
+                    response = requests.post(
+                        BACKEND_URL,
+                        data={"log_id": log_id},
+                        files={"file": ("frame.jpg", image_bytes, "image/jpeg")},
+                        timeout=10,
+                    )
+                    response.raise_for_status()
+                except Exception as error:
+                    print(f"[Uploader] Upload failed {log_id}: {error}")
+                    try:
+                        self._save_local(log_id, image_bytes)
+                    except OSError as save_error:
+                        print(f"[Uploader] Local save failed {log_id}: {save_error}")
+            finally:
+                self.queue.task_done()
+
+    def _save_local(self, log_id: str, image_bytes: bytes):
+        folder = LOCAL_IMAGE_DIR / log_id
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "frame.jpg").write_bytes(image_bytes)
+        (folder / "meta.txt").write_text(f"log_id={log_id}\n", encoding="utf-8")
+
+    def close(self):
+        self.queue.put(None)
+        self.queue.join()
+        self.thread.join()

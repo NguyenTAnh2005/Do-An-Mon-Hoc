@@ -13,9 +13,9 @@ Ai import file này:
 Lưu ý:
     - Không commit file .env lên Git (chỉ commit .env.example).
     - CLASS_MAP phải khớp enum với IoT (Tường) và Web (Anh):
-      tai_che / huu_co / vo_co — KHÔNG đổi tên khác.
-    - Tên class bên TRÁI trong CLASS_MAP phải khớp CHÍNH XÁC model.names
-      (in ra bằng: python check_classmap.py).
+      recyclable / organic / inorganic — KHÔNG đổi tên khác.
+    - Tên class bên TRÁI trong CLASS_MAP phải khớp CHÍNH XÁC model.names.
+      worker.py kiểm tra điều này trước khi kết nối camera và MQTT.
 """
 import os
 from pathlib import Path
@@ -63,13 +63,13 @@ MODEL_PATH = Path(__file__).parent / "best.pt"
 # ⚠️  Tên bên trái PHẢI khớp CHÍNH XÁC với model.names (in ra từ YOLO)
 # ⚠️  Tên bên phải PHẢI khớp với IoT (Tường) + Web (Anh) — không đổi
 CLASS_MAP = {
-    "recyclable waste": "tai_che",     # ⚠️ DẤU CÁCH, không phải gạch ngang
-    "organic-waste":    "huu_co",      # Hữu cơ
-    "inorganic-waste":  "vo_co",       # Vô cơ
+    "recyclable waste": "recyclable",  # ⚠️ DẤU CÁCH, không phải gạch ngang
+    "organic-waste":    "organic",
+    "inorganic-waste":  "inorganic",
 }
 
 # Tập enum hợp lệ — dùng để validate trước khi publish
-SYSTEM_CLASSES = {"tai_che", "huu_co", "vo_co"}
+SYSTEM_CLASSES = {"recyclable", "organic", "inorganic"}
 
 
 # ============================================================
@@ -81,8 +81,8 @@ MISS_MAX = 5            # số frame miss liên tiếp → hủy phiên
 COOLDOWN_SEC = 8        # nghỉ sau khi chốt (giây)
 MIN_VOTES = 3           # số vote tối thiểu để 1 class thắng
 
-# Ngưỡng áp đảo: class thắng phải ≥ DOMINANCE_RATIO × class nhì
-# VD: 0.5 → class thắng phải gấp đôi class nhì (10 vs 5 OK, 10 vs 8 → không tự tin)
+# Chỉ chốt nếu phiếu class nhì <= 0.5 × phiếu class thắng (class thắng >= gấp đôi).
+# VD: 10 vs 5 → chốt; 10 vs 9 → không tự tin.
 DOMINANCE_RATIO = 0.5
 
 
@@ -116,18 +116,18 @@ LOCAL_IMAGE_DIR.mkdir(exist_ok=True)
 # ============================================================
 # 8. MQTT TOPIC TEMPLATE
 # ============================================================
-def topic_phanloai(khu_vuc: int) -> str:
+def topic_classification(area: int) -> str:
     """Topic publish kết quả phân loại thành công."""
-    return f"truong/khu{khu_vuc}/phanloai"
+    return f"school/area{area}/classification"
 
-def topic_khongchac(khu_vuc: int) -> str:
+def topic_uncertain(area: int) -> str:
     """Topic publish tín hiệu 'không tự tin'."""
-    return f"truong/khu{khu_vuc}/khongchac"
+    return f"school/area{area}/uncertain"
 
-def topic_trangthai_ai(khu_vuc: int) -> str:
+def topic_status_ai(area: int) -> str:
     """Topic LWT của AI script (online/offline)."""
-    return f"truong/khu{khu_vuc}/trangthai/ai"
+    return f"school/area{area}/status/ai"
 
-def topic_mucday(khu_vuc: int, loai_rac: str) -> str:
+def topic_fill_level(area: int, waste_type: str) -> str:
     """Topic publish mức đầy — ESP32 dùng topic này."""
-    return f"truong/khu{khu_vuc}/mucday/{loai_rac}"
+    return f"school/area{area}/fill_level/{waste_type}"
