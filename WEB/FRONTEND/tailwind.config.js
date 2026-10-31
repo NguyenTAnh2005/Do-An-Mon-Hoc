@@ -8,26 +8,28 @@ export default {
 
   theme: {
     extend: {
+      // WEB/FRONTEND/tailwind.config.js — phần colors
       colors: {
-        // MÀU CHÍNH — teal thật (hue ~174°), tách hẳn khỏi success
-        primary: { DEFAULT: '#0D9488', hover: '#0F766E' },
+        // MÀU CHÍNH — xanh lá emerald, đủ đậm để không chói, tách biệt với success
+        primary: { DEFAULT: '#059669', hover: '#047857' }, // emerald-600 / emerald-700
 
-        // MÀU TRẠNG THÁI — 3 gam tách biệt: green / rose / amber
-        success: { DEFAULT: '#16A34A', hover: '#15803D' },
-        danger:  { DEFAULT: '#E11D48', hover: '#BE123C' },
+        // MÀU TRẠNG THÁI (semantic) — giữ nguyên
+        success: { DEFAULT: '#22C55E', hover: '#16A34A' },
+        danger:  { DEFAULT: '#EF4444', hover: '#DC2626' },
         warning: { DEFAULT: '#F59E0B', hover: '#D97706' },
 
+        // NEUTRAL — đen/trắng phân biệt rõ, không dùng #000/#FFF để tránh chói
         light: {
-          bg:      '#F5F8F8',   // trắng ngả teal rất nhẹ
-          surface: '#FFFFFF',
-          text:    '#0F1A1A',   // đen ngả teal nhẹ
-          muted:   '#5B6E6C'    // xám teal
+          bg:      '#F6F7F7',   // trắng xám nhẹ — phân biệt với surface
+          surface: '#FFFFFF',   // trắng tinh cho card
+          text:    '#17191A',   // đen mềm (không phải #000)
+          muted:   '#6B7274'    // xám trung tính
         },
         dark: {
-          bg:      '#0F1416',   // đen ngả teal
-          surface: '#181E20',   // surface teal nhẹ
-          text:    '#F0F4F3',   // trắng teal
-          muted:   '#8AA19E'    // xám teal sáng
+          bg:      '#0F1112',   // đen mềm (không phải #000) — viền không bị cứng
+          surface: '#1A1D1E',   // sáng hơn nền để card nổi khối
+          text:    '#EBEDEE',   // trắng mềm (không phải #FFF) — không chói
+          muted:   '#8B9193'    // xám sáng đủ đọc
         },
       },
       fontFamily: {
