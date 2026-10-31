@@ -12,8 +12,7 @@ from app.schemas.statistics import (
     StatisticsAccuracyTimeline, 
     DailyAccuracy
 )
-from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, timedelta, timezone
 
 
 def get_overview(db: Session) -> StatisticsOverview:
@@ -107,10 +106,17 @@ def get_by_area(db: Session) -> StatisticsByArea:
 
 
 VN_TZ = timezone(timedelta(hours=7))
-def get_timeline(db: Session, days: int) -> StatisticsTimeline:
-    # 1. Tính khoảng ngày theo giờ VN: days ngày gần nhất, tính cả hôm nay
+
+
+def _get_start_date(days: int) -> date:
+    """Ngày bắt đầu của khoảng N ngày gần nhất theo giờ VN (tính cả hôm nay)."""
     today = datetime.now(VN_TZ).date()
     start_date = today - timedelta(days=days - 1)
+    return start_date
+
+def get_timeline(db: Session, days: int) -> StatisticsTimeline:
+    # 1. Tính khoảng ngày theo giờ VN: days ngày gần nhất, tính cả hôm nay
+    start_date = _get_start_date(days=days)
 
     # 2. Lấy dữ liệu thô từ crud rồi đổi thành dict: {ngày: count}
     rows = statistics_crud.count_logs_by_day(db, start_date)
@@ -130,8 +136,7 @@ def get_timeline(db: Session, days: int) -> StatisticsTimeline:
 
 def get_accuracy_timeline(db: Session, days: int) -> StatisticsAccuracyTimeline:
     # 1. Khoảng ngày giống get_timeline
-    today = datetime.now(VN_TZ).date()
-    start_date = today - timedelta(days=days - 1)
+    start_date = _get_start_date(days=days)
 
     # 2. Lấy dữ liệu thô từ crud
     confirmation_rows = statistics_crud.count_confirmations_by_day(db, start_date)
