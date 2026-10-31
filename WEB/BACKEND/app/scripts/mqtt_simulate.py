@@ -21,11 +21,11 @@ SIMULATE_PASS = "simulate_publish_123"
 # Cấu hình giả lập
 AREA_IDS = [1, 2]
 WASTE_TYPES = ["recyclable", "organic", "inorganic"]
-BIN_HEIGHT_CM = 50            
-START_DISTANCE_CM = 48        # thùng gần như trống
-STEP_CM = 2                   # mỗi lần publish, khoảng cách giảm 2cm
+BIN_HEIGHT_CM = 11.5            
+START_DISTANCE_CM = 11.5        # thùng gần như trống
+STEP_CM = 1                   # mỗi lần publish, khoảng cách giảm 2cm
 MIN_DISTANCE_CM = 4           # gần đầy thì reset
-PUBLISH_INTERVAL_SEC = 1
+PUBLISH_INTERVAL_SEC = 5
 
 CLASSIFY_EVERY_N_LOOPS = 2    # cứ 4 vòng (20 giây) publish một classification
 
@@ -112,7 +112,8 @@ if __name__ == "__main__":
             publish_fill_levels()
             loop_count += 1
             if loop_count % CLASSIFY_EVERY_N_LOOPS == 0:
-                publish_classification()
+                # publish_classification()
+                pass
             time.sleep(PUBLISH_INTERVAL_SEC)
     except KeyboardInterrupt:
         print("[SIM] Dừng giả lập")

@@ -33,7 +33,9 @@ class Settings(BaseSettings):
     CLOUDINARY_NAME: str = "name"
     CLOUDINARY_API_KEY: str = "key"
     CLOUDINARY_API_SECRET: str = "secret_key"
-    
+
+    # AI tải ảnh lên cho backend 
+    AI_POST_IMAGE_KEY:str = "ai_post_img_key"
 
     class Config:
         env_file = ".env"

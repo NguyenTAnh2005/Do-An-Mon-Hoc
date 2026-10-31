@@ -94,9 +94,7 @@ def update_confirmation(db: Session, record_id: int, new_result):
     return _to_item(updated_log)
 
 
-def upload_log_image(db: Session, record_id: int, file: UploadFile):
-    log = _get_log_or_404(db, record_id)
-
+def _save_log_image(db: Session, log, file: UploadFile):
     # Chỉ cho upload khi bản ghi chưa có ảnh
     if log.image_url is not None:
         raise AppException(
@@ -138,37 +136,20 @@ def upload_log_image(db: Session, record_id: int, file: UploadFile):
     return _to_item(updated_log)
 
 
-def _destroy_log_image(log):
-    # Bản ghi chưa có ảnh thì không có gì để xóa trên Cloudinary
-    if log.cloudinary_public_id:
-        destroy_image(log.cloudinary_public_id)
-
-
-def delete_log(db: Session, record_id: int):
+def upload_log_image(db: Session, record_id: int, file: UploadFile):
+    # Admin upload thủ công: tìm bản ghi theo id
     log = _get_log_or_404(db, record_id)
-    _destroy_log_image(log)
-    log_crud.delete_log(db, log)
+    return _save_log_image(db, log, file)
 
 
-def batch_delete_logs(db: Session, ids: list[int]):
-    unique_ids = list(set(ids))  # bỏ id trùng nếu FE gửi lặp
-    logs = log_crud.get_logs_by_ids(db, unique_ids)
-
-    found_ids = {log.id for log in logs}
-    not_found_ids = sorted(i for i in unique_ids if i not in found_ids)
-
-    for log in logs:
-        _destroy_log_image(log)
-    log_crud.delete_logs(db, logs)
-
-    return BatchDeleteResult(deleted_count=len(logs), not_found_ids=not_found_ids)
-
-
-
-
-
-
-
-
-
+def upload_log_image_by_log_id(db: Session, log_id: str, file: UploadFile):
+    # AI upload: AI chỉ biết log_id (UUID), nên tìm bản ghi theo log_id
+    log = log_crud.get_log_by_log_id(db, log_id)
+    if log is None:
+        raise AppException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            error_code="CLASSIFICATION_LOG_NOT_FOUND",
+            message="❌ Không tìm thấy bản ghi phân loại với log_id này!"
+        )
+    return _save_log_image(db, log, file)
 
