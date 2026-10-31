@@ -21,7 +21,7 @@ export const TrashBinCard = ({ wasteType, percent }) => {
 
     return (
         <div className={clsx(
-            bgSurface, baseBorder, animateSlow, hoverShadow,
+            bgSurface, baseBorder, animateSlow,
             "border-2 rounded-lg p-4 flex flex-col gap-3"
         )}>
             <div className="flex items-center justify-between">
