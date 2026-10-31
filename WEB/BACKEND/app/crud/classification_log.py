@@ -78,3 +78,14 @@ def delete_logs(db: Session, logs):
     db.commit()
 
 
+def get_log_by_log_id(db: Session, log_id: str):
+    stmt = (
+        select(ClassificationLog)
+        .options(joinedload(ClassificationLog.area))
+        .where(ClassificationLog.log_id == log_id)
+    )
+    return db.execute(stmt).scalar_one_or_none()
+
+
+
+

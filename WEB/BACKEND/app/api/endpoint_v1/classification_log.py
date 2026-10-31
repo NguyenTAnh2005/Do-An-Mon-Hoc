@@ -2,7 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, Query, File, UploadFile
 from sqlalchemy.orm import Session
-
+from app.core.ai_auth import verify_ai_key
 from app.models.models import WasteType, ConfirmationResult
 from app.schemas.classification_log import ClassificationLogPage, ClassificationLogItem, ConfirmationUpdate, BatchDeleteRequest, BatchDeleteResult
 from app.services import classification_log as log_service
@@ -136,6 +136,30 @@ def batch_delete_classification_logs(
         message=f"🎉 Đã xóa {result.deleted_count} bản ghi phân loại.",
         data=result
     )
+
+
+@router.post("/ai/{log_id}/image", response_model=AppResponse[ClassificationLogItem])
+def ai_upload_classification_image(
+    log_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(connect_db),
+    _=Depends(verify_ai_key),
+):
+    """
+    ## API cho module AI tải ảnh lên theo log_id (UUID do AI tự sinh)
+        + Xác thực bằng header X-API-Key (không dùng JWT)
+        + Gửi dạng multipart/form-data, field tên `file`
+        + Không tìm thấy log_id: 404; bản ghi đã có ảnh: 409
+    """
+    result = log_service.upload_log_image_by_log_id(db, log_id, file)
+
+    return AppResponse(
+        message="🎉 AI tải ảnh lên thành công.",
+        data=result
+    )
+
+
+
 
 
 
