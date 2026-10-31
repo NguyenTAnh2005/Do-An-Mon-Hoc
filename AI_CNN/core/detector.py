@@ -223,7 +223,7 @@ class Detector:
 
                 # Ghi nhận detection đầu tiên
                 for cls_name, conf, bbox in detections:
-                    self._accumulate(cls_name, conf, frame_roi)
+                    self._accumulate(cls_name, conf, frame)
 
             return
 
@@ -246,7 +246,7 @@ class Detector:
                 self._miss_count = 0
 
                 for cls_name, conf, bbox in detections:
-                    self._accumulate(cls_name, conf, frame_roi)
+                    self._accumulate(cls_name, conf, frame)
             else:
                 # Không có object -> tăng miss_count
                 self._miss_count += 1
@@ -270,14 +270,14 @@ class Detector:
         self._best_frames.clear()
         self._miss_count = 0
 
-    def _accumulate(self, cls_name, conf, frame_roi):
+    def _accumulate(self, cls_name, conf, frame):
         """
         Tích lũy 1 detection vào phiên hiện tại.
 
         Args:
             cls_name: tên class hệ thống (recyclable/organic/inorganic)
             conf: confidence (0.0 - 1.0)
-            frame_roi: frame ROI (sẽ copy nếu là best)
+            frame: frame gốc (sẽ copy nếu là best)
         """
         # Tăng vote cho class
         self._votes[cls_name] += 1
@@ -285,7 +285,7 @@ class Detector:
         # Lưu frame nếu conf cao hơn frame tốt nhất hiện tại của class này
         if cls_name not in self._best_frames or conf > self._best_frames[cls_name][0]:
             # QUAN TRỌNG: .copy() để tránh frame bị ghi đè ở vòng lặp sau
-            self._best_frames[cls_name] = (conf, frame_roi.copy())
+            self._best_frames[cls_name] = (conf, frame.copy())
 
     def _finalize(self):
         """

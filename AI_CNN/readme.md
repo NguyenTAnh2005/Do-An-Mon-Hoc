@@ -2,6 +2,8 @@
 
 Camera chụp khay rác từ trên xuống. Chương trình so ảnh với khay trống, chạy YOLOv8n khi có vật, bình chọn loại rác qua nhiều frame, rồi gửi kết quả qua MQTT và ảnh qua HTTP.
 
+`ROI_SIZE` chỉ giới hạn vùng phân tích của YOLO và lớp so ảnh nền; ảnh gửi đi là toàn bộ frame camera tại thời điểm nhận diện tốt nhất.
+
 ## Chuẩn bị
 
 1. Cài Python và PyTorch phù hợp máy theo [hướng dẫn GPU](../DOCS/04-ai/cai-dat-pytorch-gpu.md), sau đó chạy `pip install -r requirements.txt`.

@@ -27,11 +27,12 @@ class FrameDiffer:
         # The tray must be empty while the first DIFF_WARMUP frames are captured.
         if self.background is None:
             self.background = gray.astype(np.float32)
-            self._warmup_count = 1
-            return False
         if self._warmup_count < DIFF_WARMUP:
-            cv2.accumulateWeighted(gray, self.background, DIFF_EMA_ALPHA)
+            if self._warmup_count:
+                cv2.accumulateWeighted(gray, self.background, DIFF_EMA_ALPHA)
             self._warmup_count += 1
+            if self._warmup_count == DIFF_WARMUP:
+                print(f"[FrameDiffer] Captured {DIFF_WARMUP} background frames; detection ready")
             return False
 
         diff = cv2.absdiff(gray, cv2.convertScaleAbs(self.background))
