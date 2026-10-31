@@ -58,6 +58,8 @@ AI_CNN/*.png
 !AI_CNN/**/sample/*.jpg
 
 ### ============ IOT — PlatformIO / Arduino ============
+IOT/**/.theia/
+IOT/SmartWasteIoT/secrets.h
 IOT/.pio/
 IOT/.vscode/
 IOT/**/build/
