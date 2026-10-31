@@ -48,8 +48,8 @@ if _missing:
 # 2. PHẦN CỨNG — khác nhau giữa 2 khu
 # ============================================================
 CAMERAS = {
-     1:"http://192.168.0.3:4747/video",   # Khu A — IP Webcam
-     2:"http://192.168.0.2:4747/video",   # Khu B — IP Webcam
+     1:"http://192.168.0.8:4747/video",   # Khu A — IP Webcam
+     2:"http://192.168.0.3:4747/video",   # Khu B — IP Webcam
 }
 
 
@@ -116,7 +116,7 @@ LOCAL_IMAGE_DIR.mkdir(exist_ok=True)
 # ============================================================
 # 8. MQTT TOPIC TEMPLATE
 # ============================================================
-def topic_classification(area: int) -> str:
+def topic_classification(area: int) -> str:  
     """Topic publish kết quả phân loại thành công."""
     return f"school/area{area}/classification"
 

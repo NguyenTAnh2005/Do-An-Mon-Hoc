@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import cv2
 import numpy as np
 
 os.environ.setdefault("MQTT_HOST", "localhost")
@@ -18,6 +19,18 @@ from core.frame_diff import FrameDiffer
 
 
 class PipelineTests(unittest.TestCase):
+    def test_frame_differ_announces_when_background_is_ready_once(self):
+        frame = np.zeros((100, 100, 3), dtype=np.uint8)
+        differ = FrameDiffer()
+        with patch("builtins.print") as output:
+            for _ in range(DIFF_WARMUP - 1):
+                differ.has_object(frame)
+            output.assert_not_called()
+            differ.has_object(frame)
+            output.assert_called_once_with(f"[FrameDiffer] Captured {DIFF_WARMUP} background frames; detection ready")
+            differ.has_object(frame)
+            output.assert_called_once()
+
     def test_frame_differ_detects_stationary_object_against_empty_tray(self):
         differ = FrameDiffer()
         empty = np.zeros((100, 100, 3), dtype=np.uint8)
@@ -67,6 +80,22 @@ class PipelineTests(unittest.TestCase):
             clock.return_value = 10.2
             detector.process(frame, True)
             self.assertEqual(detector.state, State.DETECTING)
+
+    def test_detector_analyzes_roi_but_uploads_full_frame(self):
+        uploader = MagicMock()
+        detector = Detector(1, object(), MagicMock(), uploader)
+        detector._run_yolo = MagicMock(return_value=[("recyclable", 0.9, None)])
+        frame = np.full((80, 120, 3), 127, dtype=np.uint8)
+
+        with patch("core.detector.ROI_SIZE", 40), patch("core.detector.time.time") as clock:
+            for moment in (0.0, 0.2, 0.4, 1.6):
+                clock.return_value = moment
+                detector.process(frame, True)
+
+        self.assertEqual([call.args[0].shape for call in detector._run_yolo.call_args_list], [(40, 40, 3)] * 3)
+        image_bytes = uploader.submit.call_args.args[1]
+        uploaded_image = cv2.imdecode(np.frombuffer(image_bytes, dtype=np.uint8), cv2.IMREAD_COLOR)
+        self.assertEqual(uploaded_image.shape, frame.shape)
 
     def test_dominance_requires_winner_to_have_twice_runner_up_votes(self):
         frame = np.zeros((20, 20, 3), dtype=np.uint8)
