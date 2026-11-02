@@ -1,13 +1,30 @@
+import { useEffect, useRef } from "react";
 import clsx from "clsx";
 import { ImageOff, Inbox } from "lucide-react";
-import { WASTE_TYPE_LABELS, CONFIRMATION_LABELS, CONFIRMATION_BADGE_CLASS} from "../../constant/index";
-import {animateSlow, baseBorder, mutedText } from "../../utils/style";
+import {
+  WASTE_TYPE_LABELS,
+  CONFIRMATION_LABELS,
+  CONFIRMATION_BADGE_CLASS,
+} from "../../constant/index";
+import { animateSlow, baseBorder, mutedText } from "../../utils/style";
 import { useNavigate } from "react-router-dom";
 
 const formatTime = (iso) => new Date(iso).toLocaleString("vi-VN");
 
-export default function HistoryTable({ items }) {
+export default function HistoryTable({ items, selectedIds, onToggleRow, onToggleAll }) {
   const navigate = useNavigate();
+  const headerCheckboxRef = useRef(null);
+
+  const allSelected = items.length > 0 && items.every((it) => selectedIds.has(it.id));
+  const someSelected = items.some((it) => selectedIds.has(it.id)) && !allSelected;
+
+  // Set thuộc tính indeterminate (chỉ set được qua DOM, không có prop React)
+  useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = someSelected;
+    }
+  }, [someSelected]);
+
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
@@ -19,11 +36,27 @@ export default function HistoryTable({ items }) {
     );
   }
 
+  const handleToggleAll = (e) => {
+    e.stopPropagation();
+    if (allSelected) onToggleAll([]);
+    else onToggleAll(items.map((it) => it.id));
+  };
+
   return (
     <div className={clsx("overflow-x-auto", animateSlow)}>
       <table className="w-full text-sm">
         <thead>
           <tr className={clsx(mutedText, "text-left text-xs uppercase tracking-wider")}>
+            <th className="w-10 px-4 py-3">
+              <input
+                ref={headerCheckboxRef}
+                type="checkbox"
+                checked={allSelected}
+                onChange={handleToggleAll}
+                className="h-4 w-4 cursor-pointer accent-danger"
+                aria-label="Chọn tất cả bản ghi trên trang"
+              />
+            </th>
             <th className="px-4 py-3 font-medium">Ảnh</th>
             <th className="px-4 py-3 font-medium">Thời gian</th>
             <th className="px-4 py-3 font-medium">Khu vực</th>
@@ -35,12 +68,28 @@ export default function HistoryTable({ items }) {
         <tbody>
           {items.map((log) => {
             const percent = Math.round(log.confidence * 100);
+            const isSelected = selectedIds.has(log.id);
+
             return (
-                <tr
-                  key={log.id}
-                  onClick={() => navigate(`/history/${log.id}`)}
-                  className={clsx(animateSlow, baseBorder, "cursor-pointer border-t hover:bg-primary/5")}
-                >
+              <tr
+                key={log.id}
+                onClick={() => navigate(`/history/${log.id}`)}
+                className={clsx(
+                  animateSlow,
+                  baseBorder,
+                  "cursor-pointer border-t hover:bg-primary/5",
+                  isSelected && "bg-danger/5 hover:bg-danger/10"
+                )}
+              >
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onToggleRow(log.id)}
+                    className="h-4 w-4 cursor-pointer accent-danger"
+                    aria-label="Chọn bản ghi"
+                  />
+                </td>
                 <td className="px-4 py-3">
                   {log.image_url ? (
                     <img

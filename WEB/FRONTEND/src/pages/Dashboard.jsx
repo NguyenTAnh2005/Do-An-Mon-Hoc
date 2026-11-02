@@ -173,7 +173,7 @@ const Dashboard = () => {
                     <section
                         key={area.id}
                         className={clsx(
-                            bgSurface, baseBorder, animateSlow, hoverShadow,
+                            bgSurface, baseBorder,
                             "border-2 rounded-xl p-5 flex flex-col gap-4"
                         )}
                     >
