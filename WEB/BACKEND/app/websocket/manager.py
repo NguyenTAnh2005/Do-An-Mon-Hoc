@@ -20,7 +20,7 @@ class ConnectionManager:
             Function xử lý thêm một ws vào danh sách
         """
         self.active.add(websocket)
-        logger.info(f" [WS] +1 kết nối, hiện có {len(self.active)}")
+        logger.info(f" [WS] +1 kết nối ({id(websocket)}), hiện có {len(self.active)}")
 
     def disconnect(self, websocket: WebSocket):
         """
@@ -29,7 +29,7 @@ class ConnectionManager:
         # Dùng discard để không báo lỗi nếu như phần tử cần xóa không tồn tại 
         # Remove thì có báo lỗi
         self.active.discard(websocket)
-        logger.info(f"[WS] -1 kết nối, còn {len(self.active)}")
+        logger.info(f"[WS] -1 kết nối ({id(websocket)}), còn {len(self.active)}")
 
     async def broadcast(self, message: dict):
         """
