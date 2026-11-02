@@ -4,10 +4,10 @@ import Dashboard from "../pages/Dashboard";
 import ClassificationHistory from "../pages/ClassificationHistory";
 import Statistics from "../pages/Statistics";
 import ClassificationDetail from "../pages/ClassificationDetail";
-import { Overview } from "../pages/stastistics/Overview";
-import { ByArea } from "../pages/stastistics/ByArea";
-import { Timeline } from "../pages/stastistics/Timeline";
-import { Accuracy } from "../pages/stastistics/Accuracy";
+import { Overview } from "../pages/statistics/Overview"
+import { ByArea } from "../pages/statistics/ByArea";
+import { Timeline } from "../pages/statistics/Timeline";
+import { Accuracy } from "../pages/statistics/Accuracy";
 
 import NotFound from "../pages/NotFound";
 

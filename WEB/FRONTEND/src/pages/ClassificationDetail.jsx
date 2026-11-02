@@ -4,9 +4,9 @@ import clsx from "clsx";
 import { AlertCircle, ArrowLeft, FileText, Loader2, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { classificationLogService } from "../services/classificationLog";
-import DetailImagePanel from "../components/ui/DetailImagePanel";
-import DetailInfoPanel from "../components/ui/DetailInfoPanel";
-import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
+import DetailImagePanel from "../components/detail/DetailImagePanel";
+import DetailInfoPanel from "../components/detail/DetailInfoPanel";
+import DeleteConfirmModal from "../components/detail/DeleteConfirmModal";
 import {
   animateFast, animateSlow, bodyLarge, mutedText, sectionTitle,
 } from "../utils/style";

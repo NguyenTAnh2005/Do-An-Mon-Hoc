@@ -2,7 +2,7 @@
 import clsx from "clsx";
 
 import { bgSurface, baseBorder, cardTitle, mutedText } from "../../utils/style";
-import { CONFIRMATION_LABELS } from "../../constant/classificationHistory";
+import { CONFIRMATION_LABELS } from "../../constant/index";
 import { CONFIRMATION_BAR_CLASS } from "../../constant/statistics";
 
 export const ConfirmBar = ({ correct, incorrect, unconfirmed }) => {

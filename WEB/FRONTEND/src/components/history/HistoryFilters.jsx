@@ -3,8 +3,7 @@ import {
   MapPin, Tag, CheckCircle2, Image as ImageIcon,
   CalendarDays, ChevronDown, RotateCcw,
 } from "lucide-react";
-import { WASTE_TYPE_LABELS } from "../../constant/dashboard";
-import { CONFIRMATION_LABELS } from "../../constant/classificationHistory";
+import { WASTE_TYPE_LABELS, CONFIRMATION_LABELS} from "../../constant/index";
 import { animateFast, animateSlow, baseBorder, mutedText } from "../../utils/style";
 
 const wrapperClass = "relative flex items-center";

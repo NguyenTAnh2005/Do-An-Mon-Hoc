@@ -3,12 +3,10 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
-import {
-    Menu, X, Recycle, LogOut, Loader2, ChevronLeft, ChevronRight
-} from "lucide-react";
+import {Menu, X, Recycle, LogOut, Loader2, ChevronLeft, ChevronRight} from "lucide-react";
 import { toast } from "react-toastify";
 
-import { ListNavItems, AppName } from "../constant/navigation";
+ import { ListNavItems, AppName } from "../constant/index";
 import ThemeToggle from "../components/ui/ThemeToggle";
 import { authService } from "../services/auth";
 import { useAuth } from "../hooks/useAuth";

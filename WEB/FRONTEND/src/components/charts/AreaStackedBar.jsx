@@ -1,12 +1,7 @@
 // src/components/ui/AreaStackedBar.jsx
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer,
 } from "recharts";
 import clsx from "clsx";
 
@@ -14,7 +9,7 @@ import { bgSurface, baseBorder, cardTitle, mutedText } from "../../utils/style";
 import {
   WASTE_TYPE_LABELS,
   WASTE_TYPE_COLORS,
-} from "../../constant/statistics";
+} from "../../constant/index";
 
 // Style chung cho tick trục — recharts đổ qua prop SVG, không nhận class Tailwind
 const AXIS_TICK_STYLE = { fontSize: 12, fill: "#6B7274" };

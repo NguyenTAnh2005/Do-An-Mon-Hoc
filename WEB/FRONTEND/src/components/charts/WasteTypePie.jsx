@@ -3,10 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import clsx from "clsx";
 
 import { bgSurface, baseBorder, cardTitle, mutedText } from "../../utils/style";
-import {
-  WASTE_TYPE_LABELS,
-  WASTE_TYPE_COLORS,
-} from "../../constant/statistics";
+import {WASTE_TYPE_LABELS, WASTE_TYPE_COLORS,} from "../../constant/index";
 
 // Tooltip tuỳ biến — mặc định recharts dùng nền xám, không hợp theme sáng/tối
 const CustomTooltip = ({ active, payload }) => {

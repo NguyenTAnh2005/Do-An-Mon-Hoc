@@ -2,11 +2,10 @@
 import clsx from "clsx";
 
 import { StatusLoading, StatusError } from "../../components/ui/FetchStatus";
-import { JsonPreview } from "../../components/ui/JsonPreview";
-import { AreaStackedBar } from "../../components/ui/AreaStackedBar";
+import { AreaStackedBar } from "../../components/charts/AreaStackedBar";
 import { useStatApi } from "../../hooks/useStatApi";
 import { getByArea } from "../../services/statistics";
-import { bgSurface, baseBorder, mutedText, animateSlow } from "../../utils/style";
+import { animateSlow } from "../../utils/style";
 
 export function ByArea() {
   const { data, loading, error } = useStatApi(getByArea);
