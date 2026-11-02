@@ -2,7 +2,7 @@
 import clsx from "clsx";
 
 import { StatusLoading, StatusError } from "../../components/ui/FetchStatus";
-import { AreaStackedBar } from "../../components/ui/AreaStackedBar";
+import { AreaStackedBar } from "../../components/charts/AreaStackedBar";
 import { useStatApi } from "../../hooks/useStatApi";
 import { getByArea } from "../../services/statistics";
 import { animateSlow } from "../../utils/style";

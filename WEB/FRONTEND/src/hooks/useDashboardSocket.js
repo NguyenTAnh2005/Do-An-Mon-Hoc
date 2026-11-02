@@ -20,7 +20,6 @@ export const useDashboardSocket = (onMessage, onReconnected) =>{
 
             ws.onopen = () =>{
                 retryCount = 0;
-                hasRefreshedForClose = false;
                 setStatus("open");
                 console.log("[WS] open");
                 if (hasOpenedBefore && onReconnected){

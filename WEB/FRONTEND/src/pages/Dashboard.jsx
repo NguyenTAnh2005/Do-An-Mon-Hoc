@@ -8,7 +8,7 @@ import {
 
 import { useDashboardSocket } from "../hooks/useDashboardSocket";
 import { dashboardService } from "../services/dashboard";
-import { TrashBinCard } from "../components/ui/TrashBinCard";
+import { TrashBinCard } from "../components/dashboard/TrashBinCard";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import { FILL_WARNING_PERCENT, FILL_DANGER_PERCENT } from "../constant/index";;
 

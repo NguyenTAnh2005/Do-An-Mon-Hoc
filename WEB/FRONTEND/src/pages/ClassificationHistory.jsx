@@ -3,8 +3,8 @@ import clsx from "clsx";
 import { History, Loader2, AlertCircle } from "lucide-react";
 import { classificationLogService } from "../services/classificationLog";
 import { dashboardService } from "../services/dashboard";
-import HistoryTable from "../components/ui/HistoryTable";
-import HistoryFilters from "../components/ui/HistoryFilters";
+import HistoryTable from "../components/history/HistoryTable";
+import HistoryFilters from "../components/history/HistoryFilters";
 import Pagination from "../components/ui/Pagination";
 import {
   bgSurface, baseBorder, mutedText,

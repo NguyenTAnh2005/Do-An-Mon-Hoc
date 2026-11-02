@@ -3,9 +3,9 @@ import clsx from "clsx";
 import { Recycle, Target, Gauge, HelpCircle } from "lucide-react";
 
 import { StatusLoading, StatusError } from "../../components/ui/FetchStatus";
-import { StatCard } from "../../components/ui/StatCard";
-import { WasteTypePie } from "../../components/ui/WasteTypePie";
-import { ConfirmBar } from "../../components/ui/ConfirmBar";
+import { StatCard } from "../../components/charts/StatCard";
+import { WasteTypePie } from "../../components/charts/WasteTypePie";
+import { ConfirmBar } from "../../components/charts/ConfirmBar";
 import { useStatApi } from "../../hooks/useStatApi";
 import { getOverview } from "../../services/statistics";
 import { animateSlow } from "../../utils/style";

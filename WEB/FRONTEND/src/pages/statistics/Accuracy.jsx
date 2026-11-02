@@ -4,16 +4,10 @@ import clsx from "clsx";
 
 import { StatusLoading, StatusError } from "../../components/ui/FetchStatus";
 import { DaysSelect } from "../../components/ui/DaysSelect";
-import { AccuracyLine } from "../../components/ui/AccuracyLine";
+import { AccuracyLine } from "../../components/charts/AccuracyLine";
 import { useStatApi } from "../../hooks/useStatApi";
 import { getAccuracyTimeline } from "../../services/statistics";
-import {
-  bgSurface,
-  baseBorder,
-  animateBase,
-  animateSlow,
-  cardTitle,
-} from "../../utils/style";
+import { bgSurface, baseBorder, animateBase, animateSlow, cardTitle} from "../../utils/style";
 
 export function Accuracy() {
   const [days, setDays] = useState(7);

@@ -4,7 +4,7 @@ import clsx from "clsx";
 
 import { StatusLoading, StatusError } from "../../components/ui/FetchStatus";
 import { DaysSelect } from "../../components/ui/DaysSelect";
-import { TimelineBar } from "../../components/ui/TimelineBar";
+import { TimelineBar } from "../../components/charts/TimelineBar";
 import { useStatApi } from "../../hooks/useStatApi";
 import { getTimeline } from "../../services/statistics";
 import {
