@@ -1,30 +1,27 @@
-// src/pages/statistics/Timeline.jsx
+// src/pages/statistics/Accuracy.jsx
 import { useCallback, useState } from "react";
 import clsx from "clsx";
 
 import { StatusLoading, StatusError } from "../../components/ui/FetchStatus";
-import { JsonPreview } from "../../components/ui/JsonPreview";
 import { DaysSelect } from "../../components/ui/DaysSelect";
-import { TimelineBar } from "../../components/ui/TimelineBar";
+import { AccuracyLine } from "../../components/ui/AccuracyLine";
 import { useStatApi } from "../../hooks/useStatApi";
-import { getTimeline } from "../../services/statistics";
+import { getAccuracyTimeline } from "../../services/statistics";
 import {
   bgSurface,
   baseBorder,
-  mutedText,
   animateBase,
   animateSlow,
   cardTitle,
 } from "../../utils/style";
 
-export function Timeline() {
+export function Accuracy() {
   const [days, setDays] = useState(7);
 
-  // useCallback giữ fetcher ổn định — useStatApi refetch khi `days` đổi
-  const fetcher = useCallback(() => getTimeline(days), [days]);
+  // fetcher phải ổn định tham chiếu — useCallback để effect chỉ chạy khi days đổi
+  const fetcher = useCallback(() => getAccuracyTimeline(days), [days]);
   const { data, loading, error } = useStatApi(fetcher);
 
-  // Loading ban đầu: chưa có data của bất kỳ lần nào
   if (loading && !data) {
     return <StatusLoading />;
   }
@@ -41,15 +38,14 @@ export function Timeline() {
           "rounded-xl border p-4 shadow-sm"
         )}
       >
-        {/* Header + bộ chọn ngày */}
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className={cardTitle}>Số lượt theo ngày</h2>
+          <h2 className={cardTitle}>Độ chính xác & độ tin cậy theo ngày</h2>
           <DaysSelect value={days} onChange={setDays} disabled={loading} />
         </div>
 
-        {/* Chart fade nhẹ khi đang fetch data mới — tránh "đứng hình" */}
+        {/* Chart mờ dần khi đang refetch — tránh flash trắng */}
         <div className={clsx(animateBase, loading && "opacity-50")}>
-          <TimelineBar items={data.data.items} />
+          <AccuracyLine items={data.data.items} />
         </div>
       </section>
     </div>

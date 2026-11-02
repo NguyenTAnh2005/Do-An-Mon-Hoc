@@ -3,13 +3,12 @@ import clsx from "clsx";
 import { Recycle, Target, Gauge, HelpCircle } from "lucide-react";
 
 import { StatusLoading, StatusError } from "../../components/ui/FetchStatus";
-import { JsonPreview } from "../../components/ui/JsonPreview";
 import { StatCard } from "../../components/ui/StatCard";
 import { WasteTypePie } from "../../components/ui/WasteTypePie";
 import { ConfirmBar } from "../../components/ui/ConfirmBar";
 import { useStatApi } from "../../hooks/useStatApi";
 import { getOverview } from "../../services/statistics";
-import { bgSurface, baseBorder, mutedText, animateSlow } from "../../utils/style";
+import { animateSlow } from "../../utils/style";
 import {
   ACCURACY_THRESHOLDS,
   STAT_EMPTY_PLACEHOLDER,

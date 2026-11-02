@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { buildDashBoardSocketURL } from "../services/dashBoardSocket";
-import { authService } from "../services/auth";
-import { tokenManager } from "../services/tokenManager";
+import { buildDashBoardSocketURL } from "../services/dashboardSocket";
+// import { authService } from "../services/auth";
+// import { tokenManager } from "../services/tokenManager";
 
 export const useDashboardSocket = (onMessage, onReconnected) =>{
     const [status, setStatus] = useState("connecting");
@@ -12,7 +12,7 @@ export const useDashboardSocket = (onMessage, onReconnected) =>{
         let timerId = null;
         let retryCount = 0;
         let hasOpenedBefore = false;
-        let hasRefreshedForClose = false;   // đã thử refresh cho đợt 1008 hiện tại chưa
+        // let hasRefreshedForClose = false;   // đã thử refresh cho đợt 1008 hiện tại chưa
         
         const connect = () =>{
             setStatus("connecting");
