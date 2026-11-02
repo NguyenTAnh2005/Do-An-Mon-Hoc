@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Moon, Sun } from 'lucide-react';
 import { motion } from "framer-motion";
-import { Button } from "../wrapper/Button";
+import { Button } from "../ui/Button";
 function ThemeToggle() {
     // 1. KHỞI TẠO BỘ NHỚ (State + LocalStorage)
     const [theme, setTheme] = useState(() => {

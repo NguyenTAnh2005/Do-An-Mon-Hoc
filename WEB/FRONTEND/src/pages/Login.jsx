@@ -2,9 +2,9 @@ import clsx from "clsx";
 import { Mail, Lock, Recycle, Leaf, ShieldCheck, Wifi } from "lucide-react";
 
 import { Input } from "../components/ui/Input";
-import { Button } from "../components/wrapper/Button";
-import { CardItem } from "../components/wrapper/CardItem";
-import { AppName, AppFullName } from "../constant/navigation";
+import { Button } from "../components/ui/Button";
+import { CardItem } from "../components/ui/CardItem";
+import { AppName, AppFullName } from "../constant/index";
 import {
     baseTextBg, sectionTitle, bodyLarge, mutedText, animateSlow
 } from "../utils/style";

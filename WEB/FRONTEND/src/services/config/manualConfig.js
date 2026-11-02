@@ -4,7 +4,7 @@
 import axios from "axios";
 import { tokenManager } from "../tokenManager";
 import { authService } from '../auth';
-import { navigateLogIn } from "../../utils/navigateLogIn";
+import { navigateLogIn } from "../../utils/format";
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,

@@ -1,10 +1,6 @@
 import clsx from "clsx";
-import {
-    bgSurface, baseBorder, mutedText, cardTitle, metaLabel, animateSlow, hoverShadow
-} from "../../utils/style";
-import {
-    WASTE_TYPE_LABELS, getFillColorClass, getFillLevelLabel
-} from "../../constant/dashboard";
+import {bgSurface, baseBorder, mutedText, cardTitle, animateSlow} from "../../utils/style";
+import {WASTE_TYPE_LABELS, getFillColorClass, getFillLevelLabel} from "../../constant/index";
 
 export const TrashBinCard = ({ wasteType, percent }) => {
     // Tên tiếng Việt, loại lạ chưa có trong bảng thì hiện tên gốc

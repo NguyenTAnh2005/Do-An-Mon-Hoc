@@ -1,11 +1,7 @@
 import clsx from "clsx";
 import { ImageOff, Inbox } from "lucide-react";
-import { WASTE_TYPE_LABELS } from "../../constant/dashboard";
-import {
-  CONFIRMATION_LABELS,
-  CONFIRMATION_BADGE_CLASS,
-} from "../../constant/classificationHistory";
-import { animateFast, animateSlow, baseBorder, mutedText } from "../../utils/style";
+import { WASTE_TYPE_LABELS, CONFIRMATION_LABELS, CONFIRMATION_BADGE_CLASS} from "../../constant/index";
+import {animateSlow, baseBorder, mutedText } from "../../utils/style";
 import { useNavigate } from "react-router-dom";
 
 const formatTime = (iso) => new Date(iso).toLocaleString("vi-VN");

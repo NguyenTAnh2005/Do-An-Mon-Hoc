@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { Frown } from "lucide-react";
 
-import { Button } from "../components/wrapper/Button";
+import { Button } from "../components/ui/Button";
 import { baseTextBg, sectionTitle, mutedText, animateSlow } from "../utils/style";
 
 const NotFound = () => {

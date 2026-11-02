@@ -3,8 +3,7 @@ import clsx from "clsx";
 import { Check, ClipboardList, HelpCircle, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { classificationLogService } from "../../services/classificationLog";
-import { WASTE_TYPE_LABELS } from "../../constant/dashboard";
-import { CONFIRMATION_LABELS } from "../../constant/classificationHistory";
+import { WASTE_TYPE_LABELS, CONFIRMATION_LABELS } from "../../constant/index";
 import { bgSurface, baseBorder, mutedText, animateFast, animateSlow } from "../../utils/style";
 
 const formatTime = (iso) => new Date(iso).toLocaleString("vi-VN");

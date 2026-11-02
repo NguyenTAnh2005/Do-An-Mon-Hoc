@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { MapPin, AlertTriangle, Server, Inbox, LayoutDashboard  } from "lucide-react";
-
 import {
     sectionTitle, cardTitle, mutedText, body, bodyLarge,
     bgSurface, baseBorder, animateSlow, hoverShadow
 } from "../utils/style";
+
 import { useDashboardSocket } from "../hooks/useDashboardSocket";
 import { dashboardService } from "../services/dashboard";
 import { TrashBinCard } from "../components/ui/TrashBinCard";
 import { StatusBadge } from "../components/ui/StatusBadge";
-import { FILL_WARNING_PERCENT, FILL_DANGER_PERCENT } from "../constant/dashboard";
+import { FILL_WARNING_PERCENT, FILL_DANGER_PERCENT } from "../constant/index";;
 
 const Dashboard = () => {
     const [areas, setAreas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
-
 
     const loadSnapshot = async () => {
         try {

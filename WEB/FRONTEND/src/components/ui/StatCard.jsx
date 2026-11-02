@@ -1,6 +1,6 @@
 // src/components/ui/StatCard.jsx
 import clsx from "clsx";
-import { CardItem } from "../wrapper/CardItem";
+import { CardItem } from "../ui/CardItem";
 import { mutedText } from "../../utils/style";
 import {
   STAT_TONE_ICON_CLASS,
