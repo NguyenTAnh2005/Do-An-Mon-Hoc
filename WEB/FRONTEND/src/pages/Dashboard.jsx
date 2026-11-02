@@ -17,6 +17,21 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
 
+
+    const loadSnapshot = async () => {
+        try {
+            const res = await dashboardService.getSnapshot();
+            setAreas(res.areas);
+            setErrorMessage(null);
+        } catch (error) {
+            console.error("[Dashboard] snapshot lỗi:", error);
+            setErrorMessage("Không tải được dữ liệu dashboard, vui lòng thử lại.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     // Nhận từng tin từ WebSocket rồi cập nhật đúng phần tử trong state
     const handleMessage = (message) => {
         if (message.type === "fill_level") {
@@ -43,24 +58,11 @@ const Dashboard = () => {
             );
         }
     };
-    const { status } = useDashboardSocket(handleMessage);
+     const { status } = useDashboardSocket(handleMessage, loadSnapshot);
 
     // Tải dữ liệu ban đầu bằng REST
     useEffect(() => {
-        let isMounted = true;
-        const fetchSnapshot = async () => {
-            try {
-                const res = await dashboardService.getSnapshot();
-                if (isMounted) setAreas(res.areas);
-            } catch (error) {
-                console.error("[Dashboard] snapshot lỗi:", error);
-                if (isMounted) setErrorMessage("Không tải được dữ liệu dashboard, vui lòng thử lại.");
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-        fetchSnapshot();
-        return () => { isMounted = false; };
+        loadSnapshot();
     }, []);
 
     // ---- Thống kê chỉ để HIỂN THỊ, đọc từ state, không thay đổi logic ----
