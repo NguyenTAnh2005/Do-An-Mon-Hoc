@@ -111,6 +111,7 @@ class Detector:
         self._miss_count = 0
 
         self._tray_cleared = False
+        self.last_result = None
 
     # ============================================================
     # HELPER — Crop ROI + chạy YOLO
@@ -128,12 +129,8 @@ class Detector:
         h, w = frame.shape[:2]
 
         # Tính tọa độ ROI vuông ở giữa
-        roi_w = ROI_SIZE
-        roi_h = ROI_SIZE
-
         # Nếu ROI lớn hơn frame -> giới hạn lại
-        roi_w = min(roi_w, w)
-        roi_h = min(roi_h, h)
+        roi_w = roi_h = min(ROI_SIZE, w, h)
 
         x1 = (w - roi_w) // 2
         y1 = (h - roi_h) // 2
@@ -265,6 +262,7 @@ class Detector:
     def _start_detecting(self, now):
         """Bắt đầu phiên DETECTING."""
         self.state = State.DETECTING
+        self.last_result = None
         self._window_start = now
         self._votes.clear()
         self._best_frames.clear()
@@ -326,6 +324,7 @@ class Detector:
                 print(f"[Detector-khu{self.khu_vuc}] Khong ap dao "
                       f"({winner}={winner_votes}, {top2[1][0]}={second_votes}) -> KHONG TU TIN")
                 self.publisher.publish_unsure()
+                self.last_result = "uncertain"
                 self._go_cooldown()
                 return
 
@@ -334,12 +333,14 @@ class Detector:
             print(f"[Detector-khu{self.khu_vuc}] It vote qua "
                   f"({winner}={winner_votes} < {MIN_VOTES}) -> KHONG TU TIN")
             self.publisher.publish_unsure()
+            self.last_result = "uncertain"
             self._go_cooldown()
             return
 
         # === THÀNH CÔNG — Chốt kết quả ===
         log_id = str(uuid.uuid4())
         conf, best_frame = self._best_frames[winner]
+        self.last_result = winner
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
         print(f"[Detector-khu{self.khu_vuc}] CHOT: {winner} "
