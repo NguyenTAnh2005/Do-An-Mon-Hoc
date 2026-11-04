@@ -20,8 +20,9 @@ class FrameDiffer:
 
     def has_object(self, frame) -> bool:
         h, w = frame.shape[:2]
-        roi_w, roi_h = min(ROI_SIZE, w), min(ROI_SIZE, h)
-        frame = frame[(h - roi_h) // 2:(h + roi_h) // 2, (w - roi_w) // 2:(w + roi_w) // 2]
+        roi_size = min(ROI_SIZE, w, h)
+        x1, y1 = (w - roi_size) // 2, (h - roi_size) // 2
+        frame = frame[y1:y1 + roi_size, x1:x1 + roi_size]
         gray = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (5, 5), 0)
 
         # The tray must be empty while the first DIFF_WARMUP frames are captured.
