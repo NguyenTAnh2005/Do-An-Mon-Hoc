@@ -60,6 +60,19 @@ class PipelineTests(unittest.TestCase):
                 self.assertFalse(differ.has_object(inside))
             self.assertTrue(differ.has_object(inside))
 
+    def test_roi_is_square_when_camera_is_wider_than_tall(self):
+        empty = np.zeros((80, 120, 3), dtype=np.uint8)
+        outside = empty.copy()
+        outside[:, :15] = 255
+        with patch("core.detector.ROI_SIZE", 100), patch("core.frame_diff.ROI_SIZE", 100):
+            detector = Detector(1, object(), MagicMock(), MagicMock())
+            self.assertEqual(detector._crop_roi(empty).shape, (80, 80, 3))
+            differ = FrameDiffer()
+            for _ in range(DIFF_WARMUP):
+                differ.has_object(empty)
+            for _ in range(4):
+                self.assertFalse(differ.has_object(outside))
+
     def test_detector_waits_for_empty_tray_before_new_session(self):
         publisher = MagicMock()
         detector = Detector(1, object(), publisher, MagicMock())
@@ -80,6 +93,15 @@ class PipelineTests(unittest.TestCase):
             clock.return_value = 10.2
             detector.process(frame, True)
             self.assertEqual(detector.state, State.DETECTING)
+
+    def test_detector_keeps_final_label_for_camera_preview(self):
+        detector = Detector(1, object(), MagicMock(), MagicMock())
+        detector._votes.update({"recyclable": 3})
+        detector._best_frames["recyclable"] = (0.9, np.zeros((20, 20, 3), dtype=np.uint8))
+        detector._finalize()
+        self.assertEqual(detector.last_result, "recyclable")
+        detector._start_detecting(1.0)
+        self.assertIsNone(detector.last_result)
 
     def test_detector_analyzes_roi_but_uploads_full_frame(self):
         uploader = MagicMock()
@@ -166,16 +188,49 @@ class PipelineTests(unittest.TestCase):
         import worker
 
         frame = np.zeros((20, 20, 3), dtype=np.uint8)
-        with patch.object(worker, "YOLO") as model_loader, patch.object(worker, "CameraStream") as camera_type, patch.object(worker, "MqttPublisher") as publisher_type, patch.object(worker, "Uploader") as uploader_type, patch.object(worker, "FrameDiffer") as differ_type, patch.object(worker, "Detector") as detector_type:
-            model_loader.return_value.names = {0: "inorganic-waste", 1: "organic-waste", 2: "recyclable waste"}
+        frame[:5] = 255
+        with patch.object(worker, "YOLO") as model_loader, patch.object(worker, "CameraStream") as camera_type, patch.object(worker, "MqttPublisher") as publisher_type, patch.object(worker, "Uploader") as uploader_type, patch.object(worker, "FrameDiffer") as differ_type, patch.object(worker, "Detector") as detector_type, patch.object(worker.cv2, "namedWindow") as named_window, patch.object(worker.cv2, "setWindowProperty") as window_property, patch.object(worker.cv2, "imshow"), patch.object(worker.cv2, "waitKey", return_value=-1), patch.object(worker.cv2, "destroyAllWindows"):
+            model_loader.return_value.names = {0: "inorganic-waste", 1: "organic-waste", 2: "recyclable-waste"}
             camera_type.return_value.read.side_effect = [frame, KeyboardInterrupt()]
             differ_type.return_value.has_object.return_value = False
+            differ_type.return_value._warmup_count = 1
             worker.main(1)
-            detector_type.return_value.process.assert_called_once_with(frame, False)
+            np.testing.assert_array_equal(differ_type.return_value.has_object.call_args.args[0], frame[5:])
+            np.testing.assert_array_equal(detector_type.return_value.process.call_args.args[0], frame[5:])
+            self.assertFalse(np.any(detector_type.return_value.process.call_args.args[0]))
             camera_type.return_value.release.assert_called_once()
             uploader_type.return_value.close.assert_called_once()
             publisher_type.return_value.publish_offline.assert_called_once()
             publisher_type.return_value.disconnect.assert_called_once()
+            named_window.assert_called_once_with("AI area 1", worker.cv2.WINDOW_NORMAL)
+            window_property.assert_called_once_with("AI area 1", worker.cv2.WND_PROP_FULLSCREEN, worker.cv2.WINDOW_FULLSCREEN)
+
+    def test_worker_preview_shows_roi_and_background_progress(self):
+        import worker
+
+        frame = np.zeros((80, 120, 3), dtype=np.uint8)
+        differ = MagicMock(_warmup_count=5)
+        detector = MagicMock(last_result=None, state=State.IDLE)
+        with patch.object(worker, "ROI_SIZE", 40), patch.object(worker.cv2, "imshow") as imshow, patch.object(worker.cv2, "waitKey", return_value=ord("q")), patch.object(worker.ImageDraw.ImageDraw, "text") as text_draw:
+            self.assertTrue(worker.show_preview(frame, differ, detector, 1))
+        self.assertTrue(any("5/30" in str(call.args[1]) for call in text_draw.call_args_list))
+        self.assertTrue(all(not (20 <= call.args[0][0] < 140 and 80 <= call.args[0][1] < 160) for call in text_draw.call_args_list))
+        imshow.assert_called_once()
+        self.assertEqual(imshow.call_args.args[1].shape, (400, 440, 3))
+        np.testing.assert_array_equal(imshow.call_args.args[1][100, 60], [110, 215, 245])
+
+        differ._warmup_count = DIFF_WARMUP
+        for result, label in (("recyclable", "Rác tái chế"), ("organic", "Rác hữu cơ"), ("inorganic", "Rác vô cơ"), ("uncertain", "Chưa xác định")):
+            with self.subTest(result=result):
+                detector.last_result = result
+                with patch.object(worker.ImageDraw.ImageDraw, "text") as text_draw, patch.object(worker.cv2, "imshow"), patch.object(worker.cv2, "waitKey", return_value=-1):
+                    self.assertFalse(worker.show_preview(frame, differ, detector, 1))
+                self.assertTrue(any(label == call.args[1] for call in text_draw.call_args_list))
+
+        wide_frame = np.zeros((480, 1140, 3), dtype=np.uint8)
+        with patch.object(worker.cv2, "imshow") as imshow, patch.object(worker.cv2, "waitKey", return_value=-1):
+            worker.show_preview(wide_frame, differ, detector, 1)
+        self.assertEqual(imshow.call_args.args[1].shape[1], 1460)
 
 
 if __name__ == "__main__":
