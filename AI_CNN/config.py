@@ -33,6 +33,7 @@ MQTT_PORT = int(os.getenv("MQTT_PORT", "8883"))
 MQTT_USER = os.getenv("MQTT_USER")
 MQTT_PASS = os.getenv("MQTT_PASS")
 BACKEND_URL = os.getenv("BACKEND_URL")
+AI_POST_IMAGE_KEY = os.getenv("AI_POST_IMAGE_KEY")
 
 # Validate: nếu thiếu config quan trọng → báo lỗi sớm
 _required = ["MQTT_HOST", "MQTT_USER", "MQTT_PASS", "BACKEND_URL"]
@@ -48,8 +49,8 @@ if _missing:
 # 2. PHẦN CỨNG — khác nhau giữa 2 khu
 # ============================================================
 CAMERAS = {
-     1:"http://192.168.0.8:4747/video",   # Khu A — IP Webcam
-     2:"http://192.168.0.3:4747/video",   # Khu B — IP Webcam
+     1:"http://192.168.0.5:4747/video",   # Khu A — IP Webcam
+     2:"http://192.168.0.4:4747/video",   # Khu B — IP Webcam
 }
 
 
@@ -57,13 +58,13 @@ CAMERAS = {
 # 3. MODEL & CLASS MAPPING
 # ============================================================
 # Đường dẫn tới file weights đã train xong
-MODEL_PATH = Path(__file__).parent / "best.pt"
+MODEL_PATH = Path(__file__).parent /"model"/"yolo_v8_training"/"weights"/"v1-best.pt"
 
 # Map tên class gốc Roboflow → enum hệ thống
 # ⚠️  Tên bên trái PHẢI khớp CHÍNH XÁC với model.names (in ra từ YOLO)
 # ⚠️  Tên bên phải PHẢI khớp với IoT (Tường) + Web (Anh) — không đổi
 CLASS_MAP = {
-    "recyclable waste": "recyclable",  # ⚠️ DẤU CÁCH, không phải gạch ngang
+    "recyclable-waste": "recyclable",  # ⚠️ DẤU CÁCH, không phải gạch ngang
     "organic-waste":    "organic",
     "inorganic-waste":  "inorganic",
 }
