@@ -33,6 +33,7 @@ MQTT_PORT = int(os.getenv("MQTT_PORT", "8883"))
 MQTT_USER = os.getenv("MQTT_USER")
 MQTT_PASS = os.getenv("MQTT_PASS")
 BACKEND_URL = os.getenv("BACKEND_URL")
+AI_POST_IMAGE_KEY = os.getenv("AI_POST_IMAGE_KEY")
 
 # Validate: nếu thiếu config quan trọng → báo lỗi sớm
 _required = ["MQTT_HOST", "MQTT_USER", "MQTT_PASS", "BACKEND_URL"]
@@ -57,7 +58,7 @@ CAMERAS = {
 # 3. MODEL & CLASS MAPPING
 # ============================================================
 # Đường dẫn tới file weights đã train xong
-MODEL_PATH = Path(__file__).parent / "best.pt"
+MODEL_PATH = Path(__file__).parent /"model"/"yolo_v8_training"/"weights"/"v1-best.pt"
 
 # Map tên class gốc Roboflow → enum hệ thống
 # ⚠️  Tên bên trái PHẢI khớp CHÍNH XÁC với model.names (in ra từ YOLO)
