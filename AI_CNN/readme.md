@@ -20,6 +20,25 @@ python worker.py 1  # khu vực 1
 python worker.py 2  # khu vực 2, ở terminal khác
 ```
 
+Mặc định worker mở giao diện camera tiếng Việt: tiến độ lấy nền, vùng ROI,
+phiếu từng loại, thời gian nhận diện, miss/5 frame, nhật ký hủy phiên,
+kết quả gần nhất, đếm ngược cooldown và hướng dẫn lấy rác ra. Hết giờ nhưng
+chưa từng thấy khay trống thì vẫn chờ; giao diện ghi rõ khi sẵn sàng lượt mới.
+Nhấn **Q**, **Esc** hoặc đóng cửa sổ để dừng. Chạy không giao diện:
+`python worker.py 1 --no-ui`.
+
+Xem thử 9 trạng thái bằng ảnh mô phỏng, **không cần model/camera/broker**:
+
+```powershell
+python preview_ui.py              # Space/Enter để qua trạng thái, Q/Esc để thoát
+python preview_ui.py --save-only  # chỉ xuất ảnh vào previews/, có overview.jpg
+```
+
+Giao diện được vẽ lên bản sao sau khi xử lý; ảnh gửi Backend không chứa HUD.
+Log MQTT chỉ xác nhận đã giao client, không xác nhận servo đã mở. Uploader
+báo riêng ảnh đã được Backend nhận hoặc đã lưu cục bộ. `core/detector.py`
+cũng dùng giao diện này khi test camera với publisher/uploader giả.
+
 Mỗi worker xử lý một camera. `Ctrl+C` dừng và báo trạng thái AI offline. Nếu gửi ảnh thất bại, ảnh được lưu vào `local_images/<log_id>/frame.jpg` cùng `meta.txt` để upload thủ công.
 
 Cửa sổ camera mở toàn màn hình và vẽ ROI vuông giữa ảnh: chỉ vật trong khung này được so với nền và đưa vào YOLO. Worker cắt 25% mép trên của luồng DroidCam để bỏ watermark trước khi lấy nền, nhận diện và gửi ảnh; chỉnh `CAMERA_TOP_CROP_RATIO` trong `config.py` nếu đổi nguồn camera. Bảng bên phải hiển thị tiến độ lấy nền trong 30 frame đầu, trạng thái nhận diện và kết quả bằng tiếng Việt. Nhấn `q` để dừng worker.

@@ -53,6 +53,7 @@ AI_CNN/runs/
 # Ảnh tạm lưu frame trước khi gửi lên BACKEND
 AI_CNN/model
 AI_CNN/tmp_frames/
+AI_CNN/previews/
 AI_CNN/*.jpg
 AI_CNN/*.png
 !AI_CNN/**/sample/*.jpg

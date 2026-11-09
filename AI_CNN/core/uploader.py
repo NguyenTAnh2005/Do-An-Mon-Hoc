@@ -3,21 +3,30 @@
 import queue
 import threading
 import uuid
-import requests
-from config import BACKEND_URL, LOCAL_IMAGE_DIR, AI_POST_IMAGE_KEY, BACKEND_URL, LOCAL_IMAGE_DIR
-import time
+from collections import deque
 
-# Chỉ thử lại khi 404 (tin MQTT chưa kịp tạo dòng log). Đơn vị: giây.
-RETRY_DELAYS = (1, 2, 4)
+import requests
+
+from config import BACKEND_URL, LOCAL_IMAGE_DIR
 
 
 class Uploader:
     def __init__(self):
+        self._events = deque(maxlen=4)
+        self._event_lock = threading.Lock()
         # shortcut: queued images live in memory until upload fails, persist before enqueue if crash recovery is required.
         self.queue = queue.Queue(maxsize=16)
         self.thread = threading.Thread(target=self._run, daemon=True)
         self.thread.start()
 
+    def _event(self, message):
+        with self._event_lock:
+            self._events.append({"message": message})
+
+    def get_events(self):
+        """Snapshots shared safely between the upload thread and camera UI."""
+        with self._event_lock:
+            return [dict(event) for event in self._events]
 
     def submit(self, log_id: str, image_bytes: bytes):
         uuid.UUID(log_id)
@@ -25,27 +34,6 @@ class Uploader:
             self.queue.put_nowait((log_id, image_bytes))
         except queue.Full:
             self._save_local(log_id, image_bytes)
-
-
-    def _post_image(self, log_id: str, image_bytes: bytes):
-        url = f"{BACKEND_URL.rstrip('/')}/{log_id}/image"
-        for delay in (0,) + RETRY_DELAYS:
-            time.sleep(delay)
-            response = requests.post(
-                url,
-                headers={"X-API-Key": AI_POST_IMAGE_KEY},
-                files={"file": ("frame.jpg", image_bytes, "image/jpeg")},
-                timeout=10,
-            )
-            if response.status_code == 404:
-                continue
-            if response.status_code == 409:
-                print(f"[Uploader] {log_id} đã có ảnh, bỏ qua")
-                return
-            response.raise_for_status()
-            return
-        raise RuntimeError("log_id chưa có trong DB sau nhiều lần thử")
-
 
     def _run(self):
         while True:
@@ -55,23 +43,30 @@ class Uploader:
                     return
                 log_id, image_bytes = item
                 try:
-                    self._post_image(log_id=log_id, image_bytes=image_bytes)
+                    response = requests.post(
+                        BACKEND_URL,
+                        data={"log_id": log_id},
+                        files={"file": ("frame.jpg", image_bytes, "image/jpeg")},
+                        timeout=10,
+                    )
+                    response.raise_for_status()
+                    self._event(f"Ảnh {log_id[:8]}: Backend đã nhận thành công.")
                 except Exception as error:
                     print(f"[Uploader] Upload failed {log_id}: {error}")
                     try:
                         self._save_local(log_id, image_bytes)
                     except OSError as save_error:
+                        self._event(f"Ảnh {log_id[:8]}: lỗi upload và lỗi lưu cục bộ; kiểm tra ổ đĩa.")
                         print(f"[Uploader] Local save failed {log_id}: {save_error}")
             finally:
                 self.queue.task_done()
-
 
     def _save_local(self, log_id: str, image_bytes: bytes):
         folder = LOCAL_IMAGE_DIR / log_id
         folder.mkdir(parents=True, exist_ok=True)
         (folder / "frame.jpg").write_bytes(image_bytes)
         (folder / "meta.txt").write_text(f"log_id={log_id}\n", encoding="utf-8")
-
+        self._event(f"Ảnh {log_id[:8]}: đã lưu local_images/{log_id}/frame.jpg để upload thủ công.")
 
     def close(self):
         self.queue.put(None)
