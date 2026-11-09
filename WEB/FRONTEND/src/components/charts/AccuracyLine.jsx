@@ -180,7 +180,7 @@ export const AccuracyLine = ({ items }) => {
             className="inline-block h-0.5 w-4 rounded-sm"
             style={{ backgroundColor: ACCURACY_LINE_COLORS.confidence }}
           />
-          <span>Độ tin cậy (×100)</span>
+          <span>Độ tin cậy</span>
         </li>
       </ul>
     </>
