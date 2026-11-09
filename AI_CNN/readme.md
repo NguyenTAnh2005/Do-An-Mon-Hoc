@@ -2,10 +2,12 @@
 
 Camera chụp khay rác từ trên xuống. Chương trình so ảnh với khay trống, chạy YOLOv8n khi có vật, bình chọn loại rác qua nhiều frame, rồi gửi kết quả qua MQTT và ảnh qua HTTP.
 
+`ROI_SIZE` chỉ giới hạn vùng phân tích của YOLO và lớp so ảnh nền; ảnh gửi đi là toàn bộ frame camera tại thời điểm nhận diện tốt nhất.
+
 ## Chuẩn bị
 
 1. Cài Python và PyTorch phù hợp máy theo [hướng dẫn GPU](../DOCS/04-ai/cai-dat-pytorch-gpu.md), sau đó chạy `pip install -r requirements.txt`.
-2. Đặt model đã train tại `AI_CNN/best.pt`. Model hiện có ba tên lớp: `inorganic-waste`, `organic-waste`, `recyclable waste`; [config.py](config.py) chuyển chúng thành `inorganic`, `organic`, `recyclable` khi gửi đi.
+2. Đặt model đã train tại `AI_CNN/best.pt`. Model hiện có ba tên lớp: `inorganic-waste`, `organic-waste`, `recyclable-waste`; [config.py](config.py) chuyển chúng thành `inorganic`, `organic`, `recyclable` khi gửi đi.
 3. Copy `.env.example` thành `.env`, điền MQTT và `BACKEND_URL`. Sửa địa chỉ hai camera trong `CAMERAS` ở `config.py` cho đúng mạng demo.
 4. Để **khay trống trong 30 frame đầu** khi khởi động để chương trình ghi ảnh nền. Nếu đổi góc camera hoặc khay, khởi động lại để ghi ảnh nền mới.
 
@@ -38,6 +40,8 @@ báo riêng ảnh đã được Backend nhận hoặc đã lưu cục bộ. `cor
 cũng dùng giao diện này khi test camera với publisher/uploader giả.
 
 Mỗi worker xử lý một camera. `Ctrl+C` dừng và báo trạng thái AI offline. Nếu gửi ảnh thất bại, ảnh được lưu vào `local_images/<log_id>/frame.jpg` cùng `meta.txt` để upload thủ công.
+
+Cửa sổ camera mở toàn màn hình và vẽ ROI vuông giữa ảnh: chỉ vật trong khung này được so với nền và đưa vào YOLO. Worker cắt 25% mép trên của luồng DroidCam để bỏ watermark trước khi lấy nền, nhận diện và gửi ảnh; chỉnh `CAMERA_TOP_CROP_RATIO` trong `config.py` nếu đổi nguồn camera. Bảng bên phải hiển thị tiến độ lấy nền trong 30 frame đầu, trạng thái nhận diện và kết quả bằng tiếng Việt. Nhấn `q` để dừng worker.
 
 Chạy test không cần camera hoặc broker thật:
 

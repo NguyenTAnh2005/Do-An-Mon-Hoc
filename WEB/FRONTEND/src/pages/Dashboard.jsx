@@ -1,21 +1,35 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { MapPin, AlertTriangle, Server, Inbox, LayoutDashboard  } from "lucide-react";
-
 import {
     sectionTitle, cardTitle, mutedText, body, bodyLarge,
     bgSurface, baseBorder, animateSlow, hoverShadow
 } from "../utils/style";
+
 import { useDashboardSocket } from "../hooks/useDashboardSocket";
 import { dashboardService } from "../services/dashboard";
-import { TrashBinCard } from "../components/ui/TrashBinCard";
+import { TrashBinCard } from "../components/dashboard/TrashBinCard";
 import { StatusBadge } from "../components/ui/StatusBadge";
-import { FILL_WARNING_PERCENT, FILL_DANGER_PERCENT } from "../constant/dashboard";
+import { FILL_WARNING_PERCENT, FILL_DANGER_PERCENT } from "../constant/index";;
 
 const Dashboard = () => {
     const [areas, setAreas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    const loadSnapshot = async () => {
+        try {
+            const res = await dashboardService.getSnapshot();
+            setAreas(res.areas);
+            setErrorMessage(null);
+        } catch (error) {
+            console.error("[Dashboard] snapshot lỗi:", error);
+            setErrorMessage("Không tải được dữ liệu dashboard, vui lòng thử lại.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     // Nhận từng tin từ WebSocket rồi cập nhật đúng phần tử trong state
     const handleMessage = (message) => {
@@ -43,24 +57,11 @@ const Dashboard = () => {
             );
         }
     };
-    const { status } = useDashboardSocket(handleMessage);
+     const { status } = useDashboardSocket(handleMessage, loadSnapshot);
 
     // Tải dữ liệu ban đầu bằng REST
     useEffect(() => {
-        let isMounted = true;
-        const fetchSnapshot = async () => {
-            try {
-                const res = await dashboardService.getSnapshot();
-                if (isMounted) setAreas(res.areas);
-            } catch (error) {
-                console.error("[Dashboard] snapshot lỗi:", error);
-                if (isMounted) setErrorMessage("Không tải được dữ liệu dashboard, vui lòng thử lại.");
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-        fetchSnapshot();
-        return () => { isMounted = false; };
+        loadSnapshot();
     }, []);
 
     // ---- Thống kê chỉ để HIỂN THỊ, đọc từ state, không thay đổi logic ----
@@ -172,7 +173,7 @@ const Dashboard = () => {
                     <section
                         key={area.id}
                         className={clsx(
-                            bgSurface, baseBorder, animateSlow, hoverShadow,
+                            bgSurface, baseBorder,
                             "border-2 rounded-xl p-5 flex flex-col gap-4"
                         )}
                     >

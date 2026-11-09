@@ -27,10 +27,3 @@ export const getAccuracyTimeline = async (days = 7) => {
   });
   return response;
 };
-
-
-// Bộ chọn số ngày cho timeline + accuracy-timeline
-export const STATS_DAYS_OPTIONS = [7, 30, 90];
-
-// Màu cột timeline — = primary #059669 trong tailwind.config
-export const TIMELINE_BAR_COLOR = "#059669";

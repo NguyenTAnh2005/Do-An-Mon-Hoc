@@ -153,3 +153,29 @@ def upload_log_image_by_log_id(db: Session, log_id: str, file: UploadFile):
         )
     return _save_log_image(db, log, file)
 
+def _destroy_log_image(log):
+    # Bản ghi chưa có ảnh thì không có gì để xóa trên Cloudinary
+    if log.cloudinary_public_id:
+        destroy_image(log.cloudinary_public_id)
+
+
+def delete_log(db: Session, record_id: int):
+    log = _get_log_or_404(db, record_id)
+    _destroy_log_image(log)
+    log_crud.delete_log(db, log)
+
+
+def batch_delete_logs(db: Session, ids: list[int]):
+    unique_ids = list(set(ids))  # bỏ id trùng nếu FE gửi lặp
+    logs = log_crud.get_logs_by_ids(db, unique_ids)
+
+    found_ids = {log.id for log in logs}
+    not_found_ids = sorted(i for i in unique_ids if i not in found_ids)
+
+    for log in logs:
+        _destroy_log_image(log)
+    log_crud.delete_logs(db, logs)
+
+    return BatchDeleteResult(deleted_count=len(logs), not_found_ids=not_found_ids)
+
+

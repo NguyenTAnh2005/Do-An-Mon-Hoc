@@ -19,7 +19,7 @@ def get_train_config(device) -> dict:
         data=str(DATA_PATH),
         epochs=150,
         imgsz=640,          # giữ nguyên theo ảnh Roboflow xuất ra, tránh resize lại tốn công
-        batch=16,           # hạ từ 32 -> 16 để né OOM khi VRAM bị chiếm bởi tiến trình khác
+        batch=32,           # hạ từ 32 -> 16 để né OOM khi VRAM bị chiếm bởi tiến trình khác
         patience=30,        # early stopping sau 30 epoch không cải thiện
         device=device,
         project=str(PROJECT_PATH),
@@ -27,11 +27,12 @@ def get_train_config(device) -> dict:
         save=True,
         save_period=10,     # lưu checkpoint phụ mỗi 10 epoch, phòng máy sập giữa chừng
         plots=True,
-        cache="disk",        # để False nếu RAM laptop không dư nhiều; True (RAM) sẽ nhanh hơn nhưng tốn RAM
+        cache=False,        # để False nếu RAM laptop không dư nhiều; True (RAM) sẽ nhanh hơn nhưng tốn RAM
         workers=4,          # số luồng load ảnh, hạ nếu CPU yếu / máy nóng
         amp=True,           # mixed precision -> giảm VRAM, tăng tốc trên RTX 4050
         cos_lr=True,        # learning rate giảm dần theo cosine, ổn định hơn cho fine-tune
         exist_ok=True,      # QUAN TRỌNG: cho phép ghi tiếp vào đúng folder cũ, không tự tách "training2"
+        seed=42
     )
 
 
