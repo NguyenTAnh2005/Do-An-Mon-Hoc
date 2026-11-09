@@ -36,6 +36,7 @@ AI_CNN/__pycache__/
 AI_CNN/**/__pycache__/
 AI_CNN/venv/
 AI_CNN/.venv/
+AI_CNN/local_images/
 
 # Model weight — thường nặng, không nên push lên git
 AI_CNN/*.pt
