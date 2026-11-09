@@ -3,6 +3,17 @@
 Phan cung da lap va duoc Tuong xac nhan test hoat dong tot.
 Firmware duoc viet va nap bang **Arduino IDE**.
 
+## Test rieng de lay so do thuc te
+
+Mo `TestKhoangCach/TestKhoangCach.ino`, chon board/COM va Upload.
+Sketch chi can ESP32Servo, tu dua ba nap ve 180 do, do 1 mau moi 3 giay
+theo thu tu **huu co -> vo co -> tai che**; moi thung lap lai sau khoang
+9 giay. Sau moi luot du ba thung co mot dong gach ngang phan cach.
+Xem Serial Monitor **115200 baud**. Khong dung Wi-Fi/MQTT,
+khong lay trung binh hay loc mau. Timeout Echo duoc bao rieng, khong ghi
+thanh 0 cm. Khi test xong, nap lai `SmartWasteIoT/SmartWasteIoT.ino`
+voi dung `AREA_NUMBER` de khoi phuc chuong trinh ket noi he thong.
+
 ## Cau truc thu muc dang su dung
 
 ```text

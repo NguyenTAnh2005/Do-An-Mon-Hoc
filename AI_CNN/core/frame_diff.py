@@ -52,6 +52,12 @@ class FrameDiffer:
         self._warmup_count = 0
         self._object_count = 0
 
+    def get_status(self):
+        """Read-only progress for the camera UI."""
+        return {"warmup_count": self._warmup_count, "warmup_total": DIFF_WARMUP,
+                "ready": self._warmup_count >= DIFF_WARMUP,
+                "object_count": self._object_count, "object_required": DIFF_MIN_MOTION}
+
 
 if __name__ == "__main__":
     from core.camera import CameraStream

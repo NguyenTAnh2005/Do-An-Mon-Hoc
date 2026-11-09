@@ -120,6 +120,7 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(post.call_args.kwargs["data"], {"log_id": log_id})
             self.assertEqual(post.call_args.kwargs["files"]["file"][1], b"jpeg")
             self.assertFalse((Path(folder) / log_id).exists())
+            self.assertIn("thành công", sender.get_events()[-1]["message"])
 
     def test_failed_upload_is_saved_for_manual_recovery(self):
         from core import uploader
@@ -132,12 +133,14 @@ class PipelineTests(unittest.TestCase):
                 sender.close()
             self.assertEqual((Path(folder) / log_id / "frame.jpg").read_bytes(), b"jpeg")
             self.assertIn(log_id, (Path(folder) / log_id / "meta.txt").read_text())
+            self.assertIn("local_images", sender.get_events()[-1]["message"])
 
     def test_worker_passes_empty_frames_to_detector_and_cleans_up(self):
         import worker
 
         frame = np.zeros((20, 20, 3), dtype=np.uint8)
-        with patch.object(worker, "YOLO") as model_loader, patch.object(worker, "CameraStream") as camera_type, patch.object(worker, "MqttPublisher") as publisher_type, patch.object(worker, "Uploader") as uploader_type, patch.object(worker, "FrameDiffer") as differ_type, patch.object(worker, "Detector") as detector_type:
+        with patch.object(worker, "MODEL_PATH") as model_path, patch.object(worker, "load_model") as model_loader, patch.object(worker, "CameraStream") as camera_type, patch.object(worker, "MqttPublisher") as publisher_type, patch.object(worker, "Uploader") as uploader_type, patch.object(worker, "FrameDiffer") as differ_type, patch.object(worker, "Detector") as detector_type, patch.object(worker, "CameraUI") as ui_type:
+            model_path.is_file.return_value = True
             model_loader.return_value.names = {0: "inorganic-waste", 1: "organic-waste", 2: "recyclable waste"}
             camera_type.return_value.read.side_effect = [frame, KeyboardInterrupt()]
             differ_type.return_value.has_object.return_value = False
@@ -147,6 +150,8 @@ class PipelineTests(unittest.TestCase):
             uploader_type.return_value.close.assert_called_once()
             publisher_type.return_value.publish_offline.assert_called_once()
             publisher_type.return_value.disconnect.assert_called_once()
+            ui_type.return_value.show.assert_called_once()
+            ui_type.return_value.close.assert_called_once()
 
 
 if __name__ == "__main__":

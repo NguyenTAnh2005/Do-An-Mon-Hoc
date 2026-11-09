@@ -3,6 +3,7 @@
 import queue
 import threading
 import uuid
+from collections import deque
 
 import requests
 
@@ -11,10 +12,21 @@ from config import BACKEND_URL, LOCAL_IMAGE_DIR
 
 class Uploader:
     def __init__(self):
+        self._events = deque(maxlen=4)
+        self._event_lock = threading.Lock()
         # shortcut: queued images live in memory until upload fails, persist before enqueue if crash recovery is required.
         self.queue = queue.Queue(maxsize=16)
         self.thread = threading.Thread(target=self._run, daemon=True)
         self.thread.start()
+
+    def _event(self, message):
+        with self._event_lock:
+            self._events.append({"message": message})
+
+    def get_events(self):
+        """Snapshots shared safely between the upload thread and camera UI."""
+        with self._event_lock:
+            return [dict(event) for event in self._events]
 
     def submit(self, log_id: str, image_bytes: bytes):
         uuid.UUID(log_id)
@@ -38,11 +50,13 @@ class Uploader:
                         timeout=10,
                     )
                     response.raise_for_status()
+                    self._event(f"Ảnh {log_id[:8]}: Backend đã nhận thành công.")
                 except Exception as error:
                     print(f"[Uploader] Upload failed {log_id}: {error}")
                     try:
                         self._save_local(log_id, image_bytes)
                     except OSError as save_error:
+                        self._event(f"Ảnh {log_id[:8]}: lỗi upload và lỗi lưu cục bộ; kiểm tra ổ đĩa.")
                         print(f"[Uploader] Local save failed {log_id}: {save_error}")
             finally:
                 self.queue.task_done()
@@ -52,6 +66,7 @@ class Uploader:
         folder.mkdir(parents=True, exist_ok=True)
         (folder / "frame.jpg").write_bytes(image_bytes)
         (folder / "meta.txt").write_text(f"log_id={log_id}\n", encoding="utf-8")
+        self._event(f"Ảnh {log_id[:8]}: đã lưu local_images/{log_id}/frame.jpg để upload thủ công.")
 
     def close(self):
         self.queue.put(None)

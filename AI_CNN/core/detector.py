@@ -37,7 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import uuid
 import time
-from collections import Counter
+from collections import Counter, deque
 from enum import Enum
 from datetime import datetime, timezone
 
@@ -111,6 +111,27 @@ class Detector:
         self._miss_count = 0
 
         self._tray_cleared = False
+        self._events = deque(maxlen=8)
+        self._last_result = None
+
+    def _event(self, kind, message):
+        self._events.append({"kind": kind, "message": message,
+                             "time": datetime.now().strftime("%H:%M:%S")})
+
+    def get_status(self, now=None):
+        """Copy display data without changing the classification session."""
+        now = time.time() if now is None else now
+        result = None if self._last_result is None else {
+            **self._last_result, "votes": dict(self._last_result["votes"])}
+        events = [dict(event) for event in self._events]
+        return {"state": self.state.value, "votes": dict(self._votes),
+                "miss_count": self._miss_count, "miss_max": MISS_MAX,
+                "window_remaining": max(0., WINDOW_SEC - (now - self._window_start)),
+                "window_total": WINDOW_SEC,
+                "cooldown_remaining": max(0., self._cooldown_until - now),
+                "cooldown_total": COOLDOWN_SEC, "tray_cleared": self._tray_cleared,
+                "last_result": result, "events": events,
+                "last_event": events[-1] if events else None}
 
     # ============================================================
     # HELPER — Crop ROI + chạy YOLO
@@ -207,6 +228,7 @@ class Detector:
                 # Hết cooldown -> về IDLE
                 self.state = State.IDLE
                 self._reset_session()
+                self._event("ready", "Đã hết thời gian nghỉ, sẵn sàng lượt tiếp theo.")
             return
 
         # ============================================================
@@ -254,6 +276,7 @@ class Detector:
                 if self._miss_count >= MISS_MAX:
                     # Mất object quá lâu -> huỷ phiên
                     print(f"[Detector-khu{self.khu_vuc}] Miss {MISS_MAX} lan -> huy phien")
+                    self._event("cancelled", f"Hủy phiên: mất detection {MISS_MAX} frame liên tiếp. Không gửi lệnh.")
                     self.state = State.IDLE
                     self._reset_session()
 
@@ -269,6 +292,8 @@ class Detector:
         self._votes.clear()
         self._best_frames.clear()
         self._miss_count = 0
+
+        self._event("detecting", f"Bắt đầu nhận diện trong {WINDOW_SEC:g} giây; giữ rác trong khung.")
 
     def _accumulate(self, cls_name, conf, frame_roi):
         """
@@ -305,6 +330,8 @@ class Detector:
         # === Trường hợp 1: Không có vote nào ===
         if not self._votes:
             print(f"[Detector-khu{self.khu_vuc}] Khong co vote -> bo qua")
+            self._last_result = {"outcome": "skipped", "votes": {}, "reason": "Không có phiếu"}
+            self._event("cancelled", "Không có phiếu: bỏ qua, không gửi lệnh.")
             self._go_cooldown()
             return
 
@@ -325,7 +352,7 @@ class Detector:
             if second_votes > DOMINANCE_RATIO * winner_votes:
                 print(f"[Detector-khu{self.khu_vuc}] Khong ap dao "
                       f"({winner}={winner_votes}, {top2[1][0]}={second_votes}) -> KHONG TU TIN")
-                self.publisher.publish_unsure()
+                self._publish_uncertain("Hai loại rác chưa đủ chênh lệch phiếu")
                 self._go_cooldown()
                 return
 
@@ -333,7 +360,7 @@ class Detector:
         if winner_votes < MIN_VOTES:
             print(f"[Detector-khu{self.khu_vuc}] It vote qua "
                   f"({winner}={winner_votes} < {MIN_VOTES}) -> KHONG TU TIN")
-            self.publisher.publish_unsure()
+            self._publish_uncertain(f"Chưa đủ {MIN_VOTES} phiếu tối thiểu")
             self._go_cooldown()
             return
 
@@ -341,6 +368,10 @@ class Detector:
         log_id = str(uuid.uuid4())
         conf, best_frame = self._best_frames[winner]
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        self._last_result = {"outcome": "classified", "waste_type": winner,
+                             "confidence": conf, "log_id": log_id,
+                             "votes": dict(self._votes), "mqtt": "pending", "image": "pending"}
+        self._event("classified", f"Chốt {winner}: {conf:.0%}, {winner_votes} phiếu.")
 
         print(f"[Detector-khu{self.khu_vuc}] CHOT: {winner} "
               f"(conf={conf:.2f}, votes={winner_votes}, log_id={log_id[:8]}...)")
@@ -353,7 +384,11 @@ class Detector:
                 confidence=conf,
                 timestamp=timestamp,
             )
+            self._last_result["mqtt"] = "queued"
+            self._event("mqtt", "Đã giao lệnh cho MQTT client; chưa xác nhận nắp mở.")
         except Exception as e:
+            self._last_result["mqtt"] = "error"
+            self._event("error", "Lỗi gửi MQTT. Kiểm tra kết nối broker.")
             print(f"[Detector-khu{self.khu_vuc}] Loi publish MQTT: {e}")
 
         # === Encode ảnh + submit uploader (async) ===
@@ -365,13 +400,28 @@ class Detector:
             if success:
                 img_bytes = img_encoded.tobytes()
                 self.uploader.submit(log_id, img_bytes)
+                self._last_result["image"] = "submitted"
+                self._event("image", "Đã giao ảnh cho uploader; xem log upload/lưu cục bộ.")
             else:
+                self._last_result["image"] = "error"
+                self._event("error", "Không mã hóa được ảnh JPEG.")
                 print(f"[Detector-khu{self.khu_vuc}] Encode JPEG that bai")
         except Exception as e:
+            self._last_result["image"] = "error"
+            self._event("error", "Lỗi giao ảnh cho uploader.")
             print(f"[Detector-khu{self.khu_vuc}] Loi submit uploader: {e}")
 
         # === Về COOLDOWN ===
         self._go_cooldown()
+
+    def _publish_uncertain(self, reason):
+        self._last_result = {"outcome": "uncertain", "votes": dict(self._votes), "reason": reason}
+        try:
+            self.publisher.publish_unsure()
+        except Exception as error:
+            self._event("error", "Lỗi gửi tín hiệu không tự tin qua MQTT.")
+            print(f"[Detector-khu{self.khu_vuc}] Loi publish uncertain: {error}")
+        self._event("uncertain", f"Không tự tin: {reason}. Hãy phân loại thủ công.")
 
     def _go_cooldown(self):
         """Chuyển sang COOLDOWN và reset phiên."""
@@ -467,6 +517,8 @@ if __name__ == "__main__":
     publisher = MockPublisher(khu_vuc=1)
     uploader = MockUploader()
     detector = Detector(khu_vuc=1, model=model, publisher=publisher, uploader=uploader)
+    from core.camera_ui import CameraUI
+    ui = CameraUI(1)
 
     print("\n>>> Bat dau test. Nhan 'q' de thoat.\n")
     print("    - Dua vat vao khay -> giu yen ~1.5s -> xem console\n")
@@ -483,42 +535,12 @@ if __name__ == "__main__":
             # Bước 2: cập nhật detector cả khi khay trống để xử lý COOLDOWN
             detector.process(frame, has_obj)
 
-            # ===== Hiển thị =====
-            # Vẽ trạng thái state lên frame
-            state_color = {
-                State.IDLE: (150, 150, 150),
-                State.DETECTING: (0, 200, 255),
-                State.COOLDOWN: (0, 100, 255),
-            }[detector.state]
-
-            cv2.putText(
-                frame,
-                f"State: {detector.state.value}",
-                (10, 40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.2,
-                state_color,
-                3,
-            )
-
-            cv2.putText(
-                frame,
-                f"Votes: {dict(detector._votes)}",
-                (10, 80),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (255, 255, 255),
-                2,
-            )
-
-            cv2.imshow("Detector Test - Nhan 'q' de thoat", frame)
-
-            if cv2.waitKey(1) & 0xFF == ord("q"):
+            if not ui.show(frame, detector.get_status(), differ.get_status(), has_obj):
                 break
 
     except KeyboardInterrupt:
         print("\n[!] Ctrl+C - thoat")
     finally:
         cam.release()
-        cv2.destroyAllWindows()
+        ui.close()
         print("[OK] Da thoat sach")
