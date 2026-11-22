@@ -7,7 +7,7 @@ from collections import deque
 
 import requests
 
-from config import BACKEND_URL, LOCAL_IMAGE_DIR
+from config import BACKEND_URL, LOCAL_IMAGE_DIR, AI_POST_IMAGE_KEY
 
 
 class Uploader:
@@ -43,9 +43,10 @@ class Uploader:
                     return
                 log_id, image_bytes = item
                 try:
+                    url_api = f"{BACKEND_URL}/{log_id}/image"
                     response = requests.post(
-                        BACKEND_URL,
-                        data={"log_id": log_id},
+                        url_api,
+                        headers={"x-api-key": AI_POST_IMAGE_KEY},
                         files={"file": ("frame.jpg", image_bytes, "image/jpeg")},
                         timeout=10,
                     )

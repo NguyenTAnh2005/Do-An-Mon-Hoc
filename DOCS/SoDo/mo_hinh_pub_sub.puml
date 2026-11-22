@@ -16,12 +16,12 @@ skinparam rectangle {
 }
 
 rectangle "Camera và AI\n(Publisher)" as AI
-rectangle "Broker\n(Mosquitto)" as BR #E8F0FE
+rectangle "Broker\n(EMQX)" as BR #E8F0FE
 rectangle "Backend\n(Subscriber)" as BE
 rectangle "ESP32\n(Publisher và Subscriber)" as ESP
 
-AI -right-> BR : publish\ntruong/khu1/phanloai
-BR -right-> BE : subscribe\ntruong/khu1/#
-ESP -up-> BR : publish\ntruong/khu1/mucday/...
-BR -down-> ESP : subscribe\ntruong/khu1/phanloai
+AI -right-> BR : publish\nschool/area1/classification
+BR -right-> BE : subscribe\nschool/area1/#
+ESP -up-> BR : publish\nschool/area1/fill_level/...
+BR -down-> ESP : subscribe\nschool/area1/classification
 @enduml

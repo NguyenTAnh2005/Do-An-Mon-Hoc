@@ -49,7 +49,7 @@ if _missing:
 # 2. PHẦN CỨNG — khác nhau giữa 2 khu
 # ============================================================
 CAMERAS = {
-     1:"http://192.168.0.19:4747/video",   # Khu A — IP Webcam
+     1:"http://192.168.0.3:4747/video",   # Khu A — IP Webcam
      2:"http://192.168.0.3:4747/video",   # Khu B — IP Webcam
 }
 
