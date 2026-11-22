@@ -245,7 +245,7 @@ class Detector:
 
                 # Ghi nhận detection đầu tiên
                 for cls_name, conf, bbox in detections:
-                    self._accumulate(cls_name, conf, frame_roi)
+                    self._accumulate(cls_name, conf, frame)
 
             return
 
@@ -268,7 +268,7 @@ class Detector:
                 self._miss_count = 0
 
                 for cls_name, conf, bbox in detections:
-                    self._accumulate(cls_name, conf, frame_roi)
+                    self._accumulate(cls_name, conf, frame)
             else:
                 # Không có object -> tăng miss_count
                 self._miss_count += 1
@@ -295,7 +295,7 @@ class Detector:
 
         self._event("detecting", f"Bắt đầu nhận diện trong {WINDOW_SEC:g} giây; giữ rác trong khung.")
 
-    def _accumulate(self, cls_name, conf, frame_roi):
+    def _accumulate(self, cls_name, conf, frame_to_save):
         """
         Tích lũy 1 detection vào phiên hiện tại.
 
@@ -310,7 +310,7 @@ class Detector:
         # Lưu frame nếu conf cao hơn frame tốt nhất hiện tại của class này
         if cls_name not in self._best_frames or conf > self._best_frames[cls_name][0]:
             # QUAN TRỌNG: .copy() để tránh frame bị ghi đè ở vòng lặp sau
-            self._best_frames[cls_name] = (conf, frame_roi.copy())
+            self._best_frames[cls_name] = (conf, frame_to_save.copy())
 
     def _finalize(self):
         """

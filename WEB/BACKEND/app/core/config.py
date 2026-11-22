@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     ST_USERNAME: str
     ST_PASSWORD: str
 
+    ND_EMAIL: str
+    ND_USERNAME: str
+    ND_PASSWORD: str 
+
     # Broker MQTT
     BROKER_ADDRESS: str
     MQTT_PORT: int

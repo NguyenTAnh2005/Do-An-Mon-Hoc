@@ -21,7 +21,7 @@
 
   export const ACCURACY_THRESHOLDS = {
     good: 80,
-    medium: 50,
+    medium: 60,
   };
 
   export const STAT_EMPTY_PLACEHOLDER = "—";

@@ -8,9 +8,9 @@ from app.core.password import get_password_hash
 
 def seed_account(db: Session):
     """Create the first manager account, reading username/email/password from .env."""
-    username = settings.ST_USERNAME
-    email = settings.ST_EMAIL
-    password = settings.ST_PASSWORD
+    username = settings.ND_USERNAME
+    email = settings.ND_EMAIL
+    password = settings.ND_PASSWORD
 
     if not username or not email or not password:
         print("⚠️ ADMIN_USERNAME / ADMIN_EMAIL / ADMIN_PASSWORD not found in .env, skipping seed_account!")

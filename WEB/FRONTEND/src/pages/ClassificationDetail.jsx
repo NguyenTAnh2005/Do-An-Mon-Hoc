@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import clsx from "clsx";
-import { AlertCircle, ArrowLeft, FileText, Loader2, Trash2 } from "lucide-react";
+import {
+  AlertCircle, ArrowLeft, Check, Copy, FileText, Loader2, Trash2,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { classificationLogService } from "../services/classificationLog";
 import DetailImagePanel from "../components/detail/DetailImagePanel";
@@ -19,6 +21,7 @@ export default function ClassificationDetail() {
   const [error, setError] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +54,18 @@ export default function ClassificationDetail() {
     }
   };
 
+  const handleCopyId = async () => {
+    if (!log?.log_id) return;
+    try {
+      await navigator.clipboard.writeText(String(log.log_id));
+      setCopied(true);
+      toast.success("Đã sao chép Log ID");
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Không thể sao chép Log ID");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-20">
@@ -76,21 +91,26 @@ export default function ClassificationDetail() {
 
   return (
     <div className={clsx("space-y-5", animateSlow)}>
-      {/* Back link — tách riêng, không đè lên header */}
+      {/* Back button — pill style, hover đổ nền primary + mũi tên trượt nhẹ */}
       <Link
         to="/history"
         className={clsx(
           animateFast,
-          "inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+          "group inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5",
+          "text-sm font-medium text-primary cursor-pointer",
+          "hover:border-primary hover:bg-primary hover:text-white hover:shadow-sm hover:shadow-primary/20"
         )}
       >
-        <ArrowLeft size={16} />
+        <ArrowLeft
+          size={15}
+          className="transition-transform group-hover:-translate-x-0.5"
+        />
         Quay lại lịch sử
       </Link>
 
       {/* Header row */}
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
           <span className="rounded-xl bg-primary/15 p-2.5 text-primary">
             <FileText size={22} />
           </span>
@@ -99,6 +119,31 @@ export default function ClassificationDetail() {
             <p className={clsx(mutedText, bodyLarge)}>
               Xem và chỉnh sửa thông tin phân loại
             </p>
+
+            {/* Log ID textbox */}
+            <div
+              className={clsx(
+                "mt-2 inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-1.5"
+              )}
+            >
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary/60">
+                Log ID
+              </span>
+              <code className="font-mono text-xs font-semibold text-primary">
+                {log.log_id}
+              </code>
+              <button
+                type="button"
+                onClick={handleCopyId}
+                title="Sao chép ID"
+                className={clsx(
+                  animateFast,
+                  "cursor-pointer rounded p-0.5 text-primary/50 hover:bg-primary/10 hover:text-primary"
+                )}
+              >
+                {copied ? <Check size={12} /> : <Copy size={12} />}
+              </button>
+            </div>
           </div>
         </div>
 
